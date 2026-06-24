@@ -1,0 +1,72 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set build timestamp
+        run: echo "BUILD_TIME=$(date +%s)" >> $GITHUB_ENV
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+          build-args: |
+            BUILD_TIME=${{ env.BUILD_TIME }}
+          no-cache: true
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          script: |
+            IMAGE="ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]'):latest"
+            CONTAINER="${{ github.event.repository.name }}"
+            ENV_FILE="/opt/1panel/apps/openresty/openresty/www/sites/auth.shenzjd.com/index/.env"
+            sudo docker pull "$IMAGE"
+            sudo docker stop "$CONTAINER" || true
+            sudo docker rm "$CONTAINER" || true
+            ENV_FLAGS=""
+            if [ -f "$ENV_FILE" ]; then
+              ENV_FLAGS="--env-file $ENV_FILE"
+            fi
+            sudo docker run -d \
+              --name "$CONTAINER" \
+              --restart unless-stopped \
+              $ENV_FLAGS \
+              -v /opt/1panel/apps/openresty/openresty/www/sites/auth.shenzjd.com/index/data:/app/data \
+              -p 3000:3000 \
+              "$IMAGE"
+            sudo docker image prune -f
