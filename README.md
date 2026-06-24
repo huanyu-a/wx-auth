@@ -241,39 +241,13 @@ WECHAT_QRCODE_URL=https://your-cdn.com/qrcode.jpg
 
 ## 🐳 Docker 部署
 
-### 自动部署（GitHub Actions）
-
-push 到 main 分支时自动构建并部署：
-
-1. 配置 GitHub Secrets：
-   - `DEPLOY_HOST` — 服务器 IP
-   - `DEPLOY_USER` — SSH 用户名
-   - `DEPLOY_PASSWORD` — SSH 密码
-
-2. 在服务器上创建 `.env` 文件：
-
-   ```bash
-   # 路径根据实际部署目录调整
-   sudo mkdir -p /opt/1panel/apps/openresty/openresty/www/sites/wx-auth.shenzjd.com/index
-   sudo nano /opt/1panel/apps/openresty/openresty/www/sites/wx-auth.shenzjd.com/index/.env
-   ```
-
-3. push 代码即自动部署，无需手动操作。
-
-### 手动构建
-
 ```bash
 docker build -t wx-auth .
 docker run -d --name wx-auth --env-file .env -p 3000:3000 -v ./data:/app/data wx-auth
 ```
 
-### 查看日志
-
+查看日志：
 ```bash
-# GitHub Actions 自动部署的容器
-sudo docker logs -f wechat-subscription-auth
-
-# 手动部署的容器
 sudo docker logs -f wx-auth
 ```
 
@@ -286,28 +260,6 @@ sudo docker logs -f wx-auth
 - **验证码** — 5分钟过期，一次性使用
 - **Cookie** — HttpOnly + SameSite=none（支持跨域）+ Secure
 - **弹窗保护** — MutationObserver + 定时器双重检测
-
----
-
-## 🐛 常见问题
-
-### Q: 公众号发消息没回复？
-查看 Docker 日志：
-```bash
-sudo docker logs -f wechat-subscription-auth
-```
-- 无任何日志 → 微信后台服务器 URL 没配对
-- `Token已配置: false` → 环境变量没读到，检查是否加了 `NUXT_` 前缀（Docker 部署时）
-- 有 `✅ 生成验证码` → 链路正常
-
-### Q: 验证码输入后报错？
-- 确认验证码未过期（5分钟）
-- 查看 Docker 日志确认验证流程
-
-### Q: 其他网站接入时 Cookie 无法携带？
-- 确保认证服务使用 HTTPS
-- SDK 已设置 `credentials: 'include'`
-- 服务端 Cookie 已设为 `SameSite=none`
 
 ---
 
