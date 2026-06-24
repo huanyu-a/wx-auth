@@ -26,8 +26,15 @@ export default eventHandler(async (event) => {
   const method = getMethod(event);
   const config = useRuntimeConfig().wechat;
 
+  console.log('[WeChat] ===== 收到请求 =====');
+  console.log(`[WeChat] Method: ${method}`);
+  console.log(`[WeChat] Token已配置: ${!!config.token}`);
+  console.log(`[WeChat] AesKey已配置: ${!!config.aesKey}`);
+  console.log(`[WeChat] Query:`, getQuery(event));
+
   // 验证配置
   if (!config.token) {
+    console.log('[WeChat] ❌ 配置缺失：WECHAT_TOKEN 未设置');
     return 'Invalid configuration';
   }
 
@@ -35,7 +42,10 @@ export default eventHandler(async (event) => {
   if (method === 'GET') {
     const { signature, timestamp, nonce, echostr } = getQuery(event);
 
+    console.log(`[WeChat] GET 验证请求: signature=${signature}, timestamp=${timestamp}, nonce=${nonce}, echostr=${echostr}`);
+
     if (!signature || !timestamp || !nonce || !echostr) {
+      console.log('[WeChat] ❌ GET 验证参数缺失');
       return 'Invalid parameters';
     }
 
@@ -46,6 +56,7 @@ export default eventHandler(async (event) => {
       config.token
     );
 
+    console.log(`[WeChat] GET 验证结果: ${isValid ? '✅ 通过' : '❌ 失败'}`);
     return isValid ? echostr : 'Invalid signature';
   }
 
@@ -53,9 +64,15 @@ export default eventHandler(async (event) => {
   if (method === 'POST') {
     const { signature, timestamp, nonce, encrypt_type, msg_signature } = getQuery(event);
 
+    console.log(`[WeChat] POST 消息请求: encrypt_type=${encrypt_type}, msg_signature=${msg_signature}`);
+
     try {
       const body = await readBody(event);
-      if (!body) return 'Empty body';
+      if (!body) {
+        console.log('[WeChat] ❌ 请求体为空');
+        return 'Empty body';
+      }
+      console.log(`[WeChat] 原始请求体: ${typeof body === 'string' ? body.substring(0, 200) : JSON.stringify(body).substring(0, 200)}`);
 
       // 判断是否是加密消息（安全模式）
       const isEncrypted = encrypt_type === 'aes' || body.includes('<Encrypt>');
@@ -104,6 +121,7 @@ export default eventHandler(async (event) => {
       }
 
       const { MsgType, Event, FromUserName, ToUserName, Content } = message;
+      console.log(`[WeChat] 解析消息: MsgType=${MsgType}, Event=${Event}, From=${FromUserName}, Content=${Content}`);
 
       // 处理消息逻辑
       let replyMsg = '';
@@ -125,22 +143,25 @@ export default eventHandler(async (event) => {
 
         if (!content) {
           // 空内容处理
+          console.log(`[WeChat] 用户 ${FromUserName} 发送空内容`);
           replyMsg = '请输入有效内容。发送"验证码"获取验证码。';
         } else if (containsAuthKeyword(content)) {
           // 认证关键词 - 重新发送验证码
           const existingCode = generateVerificationCode();
           saveAuthCode(existingCode, FromUserName);
 
-          console.log(`[WeChat] 用户 ${FromUserName} 请求验证码，重新生成 ${existingCode}`);
+          console.log(`[WeChat] ✅ 用户 ${FromUserName} 请求验证码，生成验证码: ${existingCode}`);
 
           replyMsg = generateCodeMessage(existingCode);
         } else {
           // 默认回复
+          console.log(`[WeChat] 用户 ${FromUserName} 发送非关键词: "${content}"`);
           replyMsg = '欢迎！如果您需要重新获取验证码，请发送"验证码"。';
         }
       }
 
       // 构建回复消息
+      console.log(`[WeChat] 回复内容: ${replyMsg.substring(0, 100)}`);
       if (needEncrypt && config.aesKey) {
         // ========== 安全模式：加密回复 ==========
         // 1. 生成明文回复XML
@@ -189,7 +210,7 @@ export default eventHandler(async (event) => {
       }
 
     } catch (error) {
-      console.error('[WeChat] 处理出错:', error);
+      console.error('[WeChat] ❌ 处理出错:', error);
       return 'Internal Server Error';
     }
   }
