@@ -5,9 +5,13 @@ WORKDIR /app
 
 # 复制依赖文件
 COPY package.json pnpm-lock.yaml ./
+COPY wx-auth-sdk/package.json wx-auth-sdk/pnpm-lock.yaml wx-auth-sdk/
 
 # 安装 pnpm 并安装依赖
 RUN npm install -g pnpm@9 && pnpm install --frozen-lockfile
+
+# 安装 SDK 子项目依赖
+RUN cd wx-auth-sdk && pnpm install --frozen-lockfile && cd ..
 
 # 复制源代码
 COPY . .
