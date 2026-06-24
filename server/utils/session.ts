@@ -77,7 +77,7 @@ const defaultConfig: SessionConfig = {
   name: 'wxauth-session',
   cookie: {
     maxAge: 24 * 60 * 60, // 24小时
-    sameSite: 'lax',
+    sameSite: 'none', // SaaS 跨域场景需要 none，允许其他域名携带 Cookie
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true
   }

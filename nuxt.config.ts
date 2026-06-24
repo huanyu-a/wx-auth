@@ -23,7 +23,8 @@ export default defineNuxtConfig({
         'content-type': 'application/xml'
       }
     },
-    '/api/auth/**': { ssr: false, cors: true }
+    '/api/auth/**': { ssr: false, cors: true },
+    '/api/sdk/**': { ssr: false, cors: true }
   },
 
   // 运行时配置
