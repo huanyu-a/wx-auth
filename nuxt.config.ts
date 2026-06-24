@@ -28,33 +28,35 @@ export default defineNuxtConfig({
   },
 
   // 运行时配置
+  // Docker 运行时环境变量使用 NUXT_ 前缀自动映射，如 NUXT_WECHAT_TOKEN
+  // 构建时环境变量直接使用原始名称，如 WECHAT_TOKEN
   runtimeConfig: {
     // 公开配置（客户端可用）
     public: {
-      siteUrl: process.env.SITE_URL || 'http://localhost:3000'
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'http://localhost:3000'
     },
     // 私有配置（仅服务端可用）
     wechat: {
       // 微信后台配置
-      token: process.env.WECHAT_TOKEN,
-      aesKey: process.env.WECHAT_AES_KEY || ''
+      token: process.env.NUXT_WECHAT_TOKEN || process.env.WECHAT_TOKEN || '',
+      aesKey: process.env.NUXT_WECHAT_AES_KEY || process.env.WECHAT_AES_KEY || ''
     },
     session: {
-      secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
+      secret: process.env.NUXT_SESSION_SECRET || process.env.SESSION_SECRET || 'dev-secret-change-in-production',
       cookieName: 'wxauth-session'
     },
     // 验证码配置
     code: {
-      expiry: parseInt(process.env.CODE_EXPIRY || '300'), // 5分钟
+      expiry: parseInt(process.env.NUXT_CODE_EXPIRY || process.env.CODE_EXPIRY || '300'), // 5分钟
       length: 6
     },
     // 轮询配置
     poll: {
-      interval: parseInt(process.env.POLL_INTERVAL || '3000'), // 3秒
-      timeout: parseInt(process.env.POLL_TIMEOUT || '300000') // 5分钟
+      interval: parseInt(process.env.NUXT_POLL_INTERVAL || process.env.POLL_INTERVAL || '3000'), // 3秒
+      timeout: parseInt(process.env.NUXT_POLL_TIMEOUT || process.env.POLL_TIMEOUT || '300000') // 5分钟
     },
     // 关键词配置（JSON格式，支持自定义）
-    keywords: JSON.parse(process.env.KEYWORDS || JSON.stringify(['验证码']))
+    keywords: JSON.parse(process.env.NUXT_KEYWORDS || process.env.KEYWORDS || JSON.stringify(['验证码']))
   },
 
   // Nitro 配置
