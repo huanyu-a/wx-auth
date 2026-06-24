@@ -54,7 +54,7 @@ jobs:
           script: |
             IMAGE="ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]'):latest"
             CONTAINER="${{ github.event.repository.name }}"
-            ENV_FILE="/opt/1panel/apps/openresty/openresty/www/sites/auth.shenzjd.com/index/.env"
+            ENV_FILE="/opt/1panel/apps/openresty/openresty/www/sites/wx-auth.shenzjd.com/index/.env"
             sudo docker pull "$IMAGE"
             sudo docker stop "$CONTAINER" || true
             sudo docker rm "$CONTAINER" || true
@@ -66,7 +66,7 @@ jobs:
               --name "$CONTAINER" \
               --restart unless-stopped \
               $ENV_FLAGS \
-              -v /opt/1panel/apps/openresty/openresty/www/sites/auth.shenzjd.com/index/data:/app/data \
-              -p 3000:3000 \
+              -v /opt/1panel/apps/openresty/openresty/www/sites/wx-auth.shenzjd.com/index/data:/app/data \
+              -p 6702:3000 \
               "$IMAGE"
             sudo docker image prune -f
