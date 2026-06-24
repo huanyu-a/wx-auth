@@ -11,7 +11,7 @@ import {
 } from '~/server/utils/storage';
 
 export default eventHandler(async (event) => {
-  const { authToken, openid } = getQuery(event);
+  const { authToken, openid, siteId } = getQuery(event);
 
   // 1. 检查 openid（已认证过的用户）
   if (openid) {
@@ -39,7 +39,8 @@ export default eventHandler(async (event) => {
       markUserAuthenticated(authData.openid, {
         nickname: authData.nickname,
         headimgurl: authData.headimgurl,
-        unionid: authData.unionid
+        unionid: authData.unionid,
+        siteId: siteId as string | undefined
       });
 
       // 删除已使用的认证码

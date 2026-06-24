@@ -51,6 +51,7 @@ function safeDeleteCookie(event: H3Event, name: string, options: any): void {
 
 export interface SessionData {
   authenticated?: boolean;
+  siteId?: string;
   user?: {
     openid: string;
     unionid?: string;

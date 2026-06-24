@@ -29,6 +29,7 @@ import { Protection } from "./protection";
 // 配置类型
 interface WxAuthConfig {
   apiBase: string;
+  siteId?: string;
   onVerified?: ((user: any) => void) | null;
   onError?: ((error: any) => void) | null;
   wechatName?: string;
@@ -45,6 +46,7 @@ interface WxAuthState {
 // 默认配置
 const DEFAULT_CONFIG: WxAuthConfig = {
   apiBase: "", // 后端API地址（必填）
+  siteId: "", // 站点标识（可选，用于区分来源网站）
   onVerified: null, // 验证成功回调
   onError: null, // 错误回调
   wechatName: "公众号", // 公众号名称（可选，会自动获取）
@@ -342,9 +344,11 @@ export const WxAuth = {
       return false;
     }
 
+    const siteParam = config.siteId ? `&siteId=${encodeURIComponent(config.siteId)}` : '';
+
     try {
       const result = await utils.request(
-        `${config.apiBase}/api/auth/check?openid=${openid}`
+        `${config.apiBase}/api/auth/check?openid=${openid}${siteParam}`
       );
 
       if (result.authenticated) {
@@ -366,8 +370,24 @@ export const WxAuth = {
   },
 
   // 显示认证弹窗（内部使用）
-  showAuthModal(): void {
+  async showAuthModal(): Promise<void> {
     UI.show();
+
+    // 尝试从后端获取配置（wechatName、qrcodeUrl）
+    try {
+      const siteParam = config.siteId ? `?siteId=${encodeURIComponent(config.siteId)}` : '';
+      const sdkConfig = await utils.request(
+        `${config.apiBase}/api/sdk/config${siteParam}`
+      );
+      if (sdkConfig.wechatName && !config.wechatName) {
+        config.wechatName = sdkConfig.wechatName;
+      }
+      if (sdkConfig.qrcodeUrl && !config.qrcodeUrl) {
+        config.qrcodeUrl = sdkConfig.qrcodeUrl;
+      }
+    } catch (e) {
+      console.warn("[WxAuth] 获取后端配置失败，使用默认配置", e);
+    }
 
     // 显示配置的二维码和描述
     if (config.qrcodeUrl) {
@@ -394,8 +414,9 @@ export const WxAuth = {
     const openid = utils.getCookie("wxauth-openid");
     if (openid) {
       try {
+        const siteParam = config.siteId ? `&siteId=${encodeURIComponent(config.siteId)}` : '';
         const result = await utils.request(
-          `${config.apiBase}/api/auth/check?openid=${openid}`
+          `${config.apiBase}/api/auth/check?openid=${openid}${siteParam}`
         );
         if (result.authenticated) {
           console.log("[WxAuth] 已认证（Cookie）");
@@ -407,34 +428,10 @@ export const WxAuth = {
       }
     }
 
-    // 2. 显示弹窗
-    UI.show();
+    // 2. 显示弹窗（自动从后端获取配置）
+    await this.showAuthModal();
 
-    // 3. 显示配置的二维码和描述
-    try {
-      // 显示二维码
-      if (config.qrcodeUrl) {
-        UI.setQrCode(config.qrcodeUrl);
-      }
-
-      // 更新描述文字
-      const desc = document.querySelector<HTMLElement>(".wx-auth-desc");
-      if (desc) {
-        desc.textContent = `1. 微信关注公众号 "${config.wechatName}"`;
-      }
-
-      // 自动聚焦到第一个输入框
-      setTimeout(() => {
-        const firstInput =
-          document.querySelector<HTMLInputElement>(".wx-auth-input");
-        if (firstInput) firstInput.focus();
-      }, 100);
-    } catch (error) {
-      UI.showMessage("加载失败，请重试", "error");
-      return false;
-    }
-
-    // 返回Promise，等待验证完成
+    // 3. 返回Promise，等待验证完成
     return new Promise((resolve) => {
       state.resolveAuth = resolve;
     });
@@ -459,8 +456,9 @@ export const WxAuth = {
     }
 
     try {
+      const siteParam = config.siteId ? `&siteId=${encodeURIComponent(config.siteId)}` : '';
       const result = await utils.request(
-        `${config.apiBase}/api/auth/check?authToken=${code}`
+        `${config.apiBase}/api/auth/check?authToken=${code}${siteParam}`
       );
 
       if (result.authenticated) {

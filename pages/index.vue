@@ -170,8 +170,9 @@
         </div>
 
         <!-- 底部 -->
-        <div class="bg-slate-50 px-8 py-4 border-t border-slate-200 text-center text-sm text-slate-500">
-          <p>微信订阅号认证 SDK v1.0.2 | 基于 Nuxt 4 + Vue 3 + TypeScript</p>
+        <div class="bg-slate-50 px-8 py-4 border-t border-slate-200 text-center text-sm text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p>微信订阅号认证 SDK v1.1.0 | 基于 Nuxt 4 + Vue 3 + TypeScript</p>
+          <NuxtLink to="/sdk/demo" class="text-[#07C160] hover:underline font-medium">SDK 接入文档 →</NuxtLink>
         </div>
       </div>
 
@@ -190,13 +191,15 @@ import "../wx-auth-sdk/src/wx-auth.css";
 
 // ==================== SDK 配置（修改这里） ====================
 // 你的后端 API 地址（必填）
-const API_BASE = "https://wx-auth.shenzjd.com";
+const API_BASE = "https://auth.shenzjd.com";
 
-// 公众号名称（可选，用于显示）
+// 站点标识（可选，用于区分不同网站）
+const SITE_ID = "auth-homepage";
+
+// 公众号名称（可选，自动从后端获取）
 const WECHAT_NAME = "神族九帝";
 
-// 公众号二维码 URL（可选，留空显示默认占位图）
-// 示例: 'https://your-site.com/qrcode.jpg'
+// 公众号二维码 URL（可选，自动从后端获取）
 const WECHAT_QRCODE_URL =
   "https://gcore.jsdelivr.net/gh/wu529778790/image/blog/qrcode_for_gh_61da24be23ff_258.jpg";
 // ============================================================
@@ -237,6 +240,7 @@ onMounted(async () => {
   // SDK 会自动检测 Cookie 并静默认证，未认证时显示弹窗
   WxAuth.init({
     apiBase: API_BASE,
+    siteId: SITE_ID,
     wechatName: WECHAT_NAME,
     qrcodeUrl: WECHAT_QRCODE_URL,
     onVerified: (user) => {

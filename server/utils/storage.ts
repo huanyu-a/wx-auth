@@ -20,6 +20,7 @@ interface AuthCodeData {
   nickname?: string;
   headimgurl?: string;
   unionid?: string;
+  siteId?: string;
 }
 
 interface AuthenticatedUserData {
@@ -27,6 +28,7 @@ interface AuthenticatedUserData {
   nickname?: string;
   headimgurl?: string;
   unionid?: string;
+  siteId?: string;
 }
 
 interface StorageData {
@@ -125,7 +127,7 @@ function cleanupExpiredData() {
 export function saveAuthCode(
   code: string,
   openid: string,
-  userInfo?: { nickname?: string; headimgurl?: string; unionid?: string }
+  userInfo?: { nickname?: string; headimgurl?: string; unionid?: string; siteId?: string }
 ) {
   const data = loadData();
   const expiryTime = parseInt(process.env.CODE_EXPIRY || '300') * 1000;
@@ -144,7 +146,8 @@ export function saveAuthCode(
     expiredAt,
     nickname: userInfo?.nickname,
     headimgurl: userInfo?.headimgurl,
-    unionid: userInfo?.unionid
+    unionid: userInfo?.unionid,
+    siteId: userInfo?.siteId
   };
 
   saveData(data);
@@ -191,7 +194,7 @@ export function deleteAuthCode(code: string) {
  */
 export function markUserAuthenticated(
   openid: string,
-  userInfo: { nickname?: string; headimgurl?: string; unionid?: string }
+  userInfo: { nickname?: string; headimgurl?: string; unionid?: string; siteId?: string }
 ) {
   const data = loadData();
 
@@ -199,7 +202,8 @@ export function markUserAuthenticated(
     authenticatedAt: new Date().toISOString(),
     nickname: userInfo?.nickname,
     headimgurl: userInfo?.headimgurl,
-    unionid: userInfo?.unionid
+    unionid: userInfo?.unionid,
+    siteId: userInfo?.siteId
   };
 
   saveData(data);

@@ -23,9 +23,9 @@ import { WxAuth } from '@wu529778790/wechat-auth-sdk';
 import '@wu529778790/wechat-auth-sdk/dist/style.css';
 
 WxAuth.init({
-  apiBase: 'https://your-api.com',
-  wechatName: '我的公众号',
-  qrcodeUrl: 'https://your-site.com/qrcode.jpg',
+  apiBase: 'https://auth.shenzjd.com',
+  siteId: 'my-website',  // 可选，标识你的网站
+  // wechatName 和 qrcodeUrl 会自动从后端获取，也可以手动指定
   onVerified: (user) => {
     console.log('认证成功', user);
   },
@@ -41,7 +41,8 @@ WxAuth.init({
 <script src="./dist/wx-auth.umd.js"></script>
 <script>
   WxAuth.init({
-    apiBase: 'https://your-api.com',
+    apiBase: 'https://auth.shenzjd.com',
+    siteId: 'my-website',  // 可选，标识你的网站
     onVerified: (user) => {
       console.log('认证成功', user);
     }
@@ -54,8 +55,9 @@ WxAuth.init({
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | `apiBase` | `string` | ✅ | 后端 API 地址 |
-| `wechatName` | `string` | ❌ | 公众号名称（默认: "公众号"） |
-| `qrcodeUrl` | `string` | ❌ | 二维码图片 URL |
+| `siteId` | `string` | ❌ | 站点标识，用于区分不同接入网站 |
+| `wechatName` | `string` | ❌ | 公众号名称（可选，自动从后端获取） |
+| `qrcodeUrl` | `string` | ❌ | 二维码图片 URL（可选，自动从后端获取） |
 | `onVerified` | `(user) => void` | ❌ | 验证成功回调 |
 | `onError` | `(error) => void` | ❌ | 错误回调 |
 
@@ -104,10 +106,26 @@ SDK 内置防删除保护，防止用户从控制台删除认证弹窗：
 
 SDK 需要以下后端 API 端点：
 
-### 1. 认证检查
+### 1. SDK 配置获取（可选，推荐）
 ```
-GET /api/auth/check?authToken={code}  // 通过验证码验证
-GET /api/auth/check?openid={openid}   // 通过 OpenID 验证
+GET /api/sdk/config?siteId={siteId}
+```
+
+**响应：**
+```json
+{
+  "wechatName": "公众号名称",
+  "qrcodeUrl": "https://example.com/qrcode.jpg",
+  "codeLength": 6
+}
+```
+
+> 当 `wechatName` 和 `qrcodeUrl` 未在 `init()` 中手动指定时，SDK 会自动从该接口获取。
+
+### 2. 认证检查
+```
+GET /api/auth/check?authToken={code}&siteId={siteId}  // 通过验证码验证
+GET /api/auth/check?openid={openid}&siteId={siteId}   // 通过 OpenID 验证
 ```
 
 **响应：**
@@ -204,7 +222,8 @@ SDK 初始化
 import { WxAuth } from '@wu529778790/wechat-auth-sdk';
 
 WxAuth.init({
-  apiBase: 'https://api.your-site.com',
+  apiBase: 'https://auth.shenzjd.com',
+  siteId: 'my-blog',  // 标识你的网站
   onVerified: (user) => {
     // 认证成功，允许访问内容
     showContent();
@@ -250,6 +269,6 @@ MIT License
 
 ---
 
-**版本**: 1.0.0
+**版本**: 1.1.0
 **构建时间**: 2025-12-30
 **状态**: ✅ 生产就绪

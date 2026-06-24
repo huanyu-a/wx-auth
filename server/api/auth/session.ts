@@ -10,7 +10,7 @@ export default eventHandler(async (event) => {
   // 设置 Session
   if (method === 'POST') {
     const body = await readBody(event);
-    const { user } = body;
+    const { user, siteId } = body;
 
     if (!user || !user.openid) {
       throw createError({
@@ -22,6 +22,7 @@ export default eventHandler(async (event) => {
     const session = await createSession(event);
     await session.update({
       authenticated: true,
+      siteId: siteId || undefined,
       user: {
         openid: user.openid,
         unionid: user.unionid,

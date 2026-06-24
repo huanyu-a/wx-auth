@@ -44,7 +44,7 @@ export default defineConfig({
     // CSS 处理
     cssCodeSplit: true,
     // 压缩
-    minify: 'terser',
+    minify: 'esbuild',
     // 输出目录
     outDir: 'dist',
     // 清空输出目录
