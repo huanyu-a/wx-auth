@@ -190,8 +190,8 @@ import { WxAuth } from "../wx-auth-sdk/src/index";
 import "../wx-auth-sdk/src/wx-auth.css";
 
 // ==================== SDK 配置（修改这里） ====================
-// 你的后端 API 地址（必填）
-const API_BASE = "https://auth.shenzjd.com";
+// 后端 API 地址（同部署域名时留空，自动使用当前域名）
+const API_BASE = "";
 
 // 站点标识（可选，用于区分不同网站）
 const SITE_ID = "auth-homepage";

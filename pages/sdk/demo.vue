@@ -177,7 +177,6 @@ import "../../wx-auth-sdk/src/wx-auth.css";
 
 function triggerDemoAuth() {
   WxAuth.init({
-    apiBase: window.location.origin,
     siteId: "sdk-demo",
     onVerified: (user) => {
       alert("认证成功！用户信息：" + JSON.stringify(user));

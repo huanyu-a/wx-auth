@@ -322,6 +322,11 @@ export const WxAuth = {
   init(options: Partial<WxAuthConfig> = {}): void {
     config = { ...DEFAULT_CONFIG, ...options };
 
+    // 未设置 apiBase 时自动使用当前域名
+    if (!config.apiBase && typeof window !== "undefined") {
+      config.apiBase = window.location.origin;
+    }
+
     if (!config.apiBase) {
       console.error("[WxAuth] apiBase is required");
       return;
