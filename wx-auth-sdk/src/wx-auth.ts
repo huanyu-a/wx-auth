@@ -63,6 +63,28 @@ let state: WxAuthState = {
 // ==================== 工具函数 ====================
 
 const utils = {
+  // 从 apiBase 自动推导根域名（用于跨子域名共享 Cookie）
+  // wx-auth.shenzjd.com → .shenzjd.com
+  // parse.shenzjd.com   → .shenzjd.com
+  // localhost / 127.0.0.1 / IP → 不设置 domain
+  getRootDomain(): string {
+    try {
+      const hostname = new URL(config.apiBase || window.location.origin).hostname;
+      // localhost / IP 地址不设置 domain
+      if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+        return '';
+      }
+      const parts = hostname.split('.');
+      // 至少两段才有意义（shenzjd.com），取最后两段
+      if (parts.length >= 2) {
+        return '.' + parts.slice(-2).join('.');
+      }
+      return '';
+    } catch {
+      return '';
+    }
+  },
+
   // 获取Cookie
   getCookie(name: string): string | null {
     const value = `; ${document.cookie}`;
@@ -71,16 +93,20 @@ const utils = {
     return null;
   },
 
-  // 设置Cookie（30天过期）
+  // 设置Cookie（30天过期，自动设置根域名实现跨子域共享）
   setCookie(name: string, value: string): void {
     const date = new Date();
     date.setTime(date.getTime() + 30 * 24 * 60 * 60 * 1000);
-    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+    const domain = this.getRootDomain();
+    const domainStr = domain ? `;domain=${domain}` : '';
+    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/${domainStr}`;
   },
 
-  // 删除Cookie
+  // 删除Cookie（匹配相同的 domain）
   deleteCookie(name: string): void {
-    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    const domain = this.getRootDomain();
+    const domainStr = domain ? `;domain=${domain}` : '';
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/${domainStr}`;
   },
 
   // 发送请求
