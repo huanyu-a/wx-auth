@@ -43,11 +43,11 @@
             <div class="space-y-3">
               <div class="bg-slate-900 rounded-xl p-4 overflow-x-auto">
                 <pre class="text-sm text-green-400 font-mono"><code># 安装 SDK
-npm install @wu529778790/wechat-auth-sdk</code></pre>
+npm install wx-auth-sdk</code></pre>
               </div>
               <div class="bg-slate-900 rounded-xl p-4 overflow-x-auto">
-                <pre class="text-sm text-slate-300 font-mono leading-relaxed"><code><span class="text-purple-400">import</span> { WxAuth } <span class="text-purple-400">from</span> <span class="text-yellow-300">'@wu529778790/wechat-auth-sdk'</span>;
-<span class="text-purple-400">import</span> <span class="text-yellow-300">'@wu529778790/wechat-auth-sdk/dist/style.css'</span>;
+                <pre class="text-sm text-slate-300 font-mono leading-relaxed"><code><span class="text-purple-400">import</span> { WxAuth } <span class="text-purple-400">from</span> <span class="text-yellow-300">'wx-auth-sdk'</span>;
+<span class="text-purple-400">import</span> <span class="text-yellow-300">'wx-auth-sdk/dist/style.css'</span>;
 
 WxAuth.<span class="text-blue-400">init</span>({
   apiBase: <span class="text-yellow-300">'https://auth.shenzjd.com'</span>,
@@ -71,8 +71,8 @@ WxAuth.<span class="text-blue-400">init</span>({
             </h2>
             <div class="bg-slate-900 rounded-xl p-4 overflow-x-auto">
               <pre class="text-sm text-slate-300 font-mono leading-relaxed"><code><span class="text-slate-500">&lt;!-- 引入样式和脚本 --&gt;</span>
-<span class="text-red-400">&lt;link</span> rel=<span class="text-yellow-300">"stylesheet"</span> href=<span class="text-yellow-300">"https://unpkg.com/@wu529778790/wechat-auth-sdk/dist/wx-auth.css"</span><span class="text-red-400">&gt;</span>
-<span class="text-red-400">&lt;script</span> src=<span class="text-yellow-300">"https://unpkg.com/@wu529778790/wechat-auth-sdk/dist/wx-auth.umd.js"</span><span class="text-red-400">&gt;&lt;/script&gt;</span>
+<span class="text-red-400">&lt;link</span> rel=<span class="text-yellow-300">"stylesheet"</span> href=<span class="text-yellow-300">"https://unpkg.com/wx-auth-sdk/dist/wx-auth.css"</span><span class="text-red-400">&gt;</span>
+<span class="text-red-400">&lt;script</span> src=<span class="text-yellow-300">"https://unpkg.com/wx-auth-sdk/dist/wx-auth.umd.js"</span><span class="text-red-400">&gt;&lt;/script&gt;</span>
 
 <span class="text-red-400">&lt;script&gt;</span>
   WxAuth.<span class="text-blue-400">init</span>({

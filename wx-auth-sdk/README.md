@@ -6,7 +6,7 @@
 
 ### NPM 方式（推荐）
 ```bash
-npm install @wu529778790/wechat-auth-sdk
+npm install wx-auth-sdk
 ```
 
 ### CDN 方式
@@ -19,8 +19,8 @@ npm install @wu529778790/wechat-auth-sdk
 
 ### ES Module
 ```typescript
-import { WxAuth } from '@wu529778790/wechat-auth-sdk';
-import '@wu529778790/wechat-auth-sdk/dist/style.css';
+import { WxAuth } from 'wx-auth-sdk';
+import 'wx-auth-sdk/dist/style.css';
 
 WxAuth.init({
   apiBase: 'https://auth.shenzjd.com',
@@ -219,7 +219,7 @@ SDK 初始化
 
 ### 1. 独立网站集成
 ```typescript
-import { WxAuth } from '@wu529778790/wechat-auth-sdk';
+import { WxAuth } from 'wx-auth-sdk';
 
 WxAuth.init({
   apiBase: 'https://auth.shenzjd.com',

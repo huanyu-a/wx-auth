@@ -117,12 +117,12 @@ SDK 初始化（apiBase + siteId）
 ### NPM 方式
 
 ```bash
-npm install @wu529778790/wechat-auth-sdk
+npm install wx-auth-sdk
 ```
 
 ```typescript
-import { WxAuth } from '@wu529778790/wechat-auth-sdk';
-import '@wu529778790/wechat-auth-sdk/dist/style.css';
+import { WxAuth } from 'wx-auth-sdk';
+import 'wx-auth-sdk/dist/style.css';
 
 WxAuth.init({
   apiBase: 'https://wx-auth.shenzjd.com',  // 认证服务地址
@@ -137,8 +137,8 @@ WxAuth.init({
 ### CDN 方式
 
 ```html
-<link rel="stylesheet" href="https://unpkg.com/@wu529778790/wechat-auth-sdk/dist/wx-auth.css">
-<script src="https://unpkg.com/@wu529778790/wechat-auth-sdk/dist/wx-auth.umd.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/wx-auth-sdk/dist/wx-auth.css">
+<script src="https://unpkg.com/wx-auth-sdk/dist/wx-auth.umd.js"></script>
 <script>
   WxAuth.init({
     apiBase: 'https://wx-auth.shenzjd.com',
