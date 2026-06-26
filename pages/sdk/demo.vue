@@ -97,7 +97,7 @@ WxAuth.<span class="text-blue-400">init</span>({
             <div class="space-y-3 text-sm">
               <div class="flex items-start gap-3">
                 <span class="inline-flex items-center justify-center px-2 py-0.5 bg-[#07C160]/10 text-[#07C160] rounded-md font-mono text-xs flex-shrink-0">apiBase</span>
-                <span class="text-slate-600">后端 API 地址（必填），当前为 <code class="bg-slate-200 px-1 rounded text-xs">auth.shenzjd.com</code></span>
+                <span class="text-slate-600">后端 API 地址（必填），当前为 <code class="bg-slate-200 px-1 rounded text-xs">wx-auth.shenzjd.com</code></span>
               </div>
               <div class="flex items-start gap-3">
                 <span class="inline-flex items-center justify-center px-2 py-0.5 bg-blue-500/10 text-blue-600 rounded-md font-mono text-xs flex-shrink-0">siteId</span>
