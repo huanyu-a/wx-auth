@@ -1,5 +1,5 @@
 {
-  "name": "wechat-subscription-auth-v4",
+  "name": "wx-auth",
   "private": true,
   "type": "module",
   "scripts": {

@@ -168,7 +168,7 @@ WxAuth.init({
 ## 📁 项目结构
 
 ```
-wechat-subscription-auth/
+wx-auth/
 ├── server/                          # 后端服务
 │   ├── api/
 │   │   ├── wechat/
