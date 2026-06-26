@@ -78,16 +78,17 @@ pnpm type-check       # TypeScript 类型检查
 
 ### 环境变量（.env）
 ```bash
-# 必须
-SITE_URL=https://your-site.com
-WECHAT_TOKEN=your-wechat-token
-SESSION_SECRET=dev-secret-change-in-production
+# 必须（Docker 部署必须加 NUXT_ 前缀，否则构建时被内联为空值）
+NUXT_PUBLIC_SITE_URL=https://wx-auth.shenzjd.com
+NUXT_WECHAT_TOKEN=your-wechat-token
+NUXT_SESSION_SECRET=dev-secret-change-in-production
+NUXT_WECHAT_NAME=神族九帝
+NUXT_WECHAT_QRCODE_URL=https://your-site.com/qrcode.jpg
 
 # 可选（个人订阅号留空）
-WECHAT_AES_KEY=
-WECHAT_QRCODE_URL=https://your-site.com/qrcode.jpg
-CODE_EXPIRY=300
-KEYWORDS=["验证码"]
+NUXT_WECHAT_AES_KEY=
+NUXT_CODE_EXPIRY=300
+NUXT_KEYWORDS=["验证码"]
 STORAGE_TYPE=file  # 或 sqlite
 ```
 
