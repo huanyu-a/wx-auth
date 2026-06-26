@@ -18,13 +18,12 @@ export default defineNuxtConfig({
     '/admin/**': { ssr: false },
     '/api/wechat/**': {
       ssr: false,
-      cors: true,
       headers: {
         'content-type': 'application/xml'
       }
     },
-    '/api/auth/**': { ssr: false, cors: true },
-    '/api/sdk/**': { ssr: false, cors: true }
+    '/api/auth/**': { ssr: false },
+    '/api/sdk/**': { ssr: false }
   },
 
   // 运行时配置
