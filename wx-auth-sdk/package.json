@@ -35,8 +35,17 @@
     "微信订阅号认证系统",
     "微信订阅号认证SDK"
   ],
-  "author": "",
+  "author": "wu529778790",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wu529778790/wx-auth.git",
+    "directory": "wx-auth-sdk"
+  },
+  "homepage": "https://github.com/wu529778790/wx-auth/tree/main/wx-auth-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/wu529778790/wx-auth/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
