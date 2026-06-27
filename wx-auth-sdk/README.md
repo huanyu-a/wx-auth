@@ -23,7 +23,7 @@ import { WxAuth } from 'wx-auth-sdk';
 import 'wx-auth-sdk/dist/style.css';
 
 WxAuth.init({
-  apiBase: 'https://auth.shenzjd.com',
+  apiBase: 'https://wx-auth.shenzjd.com',
   siteId: 'my-website',  // 可选，标识你的网站
   // wechatName 和 qrcodeUrl 会自动从后端获取，也可以手动指定
   onVerified: (user) => {
@@ -41,7 +41,7 @@ WxAuth.init({
 <script src="./dist/wx-auth.umd.js"></script>
 <script>
   WxAuth.init({
-    apiBase: 'https://auth.shenzjd.com',
+    apiBase: 'https://wx-auth.shenzjd.com',
     siteId: 'my-website',  // 可选，标识你的网站
     onVerified: (user) => {
       console.log('认证成功', user);
@@ -222,7 +222,7 @@ SDK 初始化
 import { WxAuth } from 'wx-auth-sdk';
 
 WxAuth.init({
-  apiBase: 'https://auth.shenzjd.com',
+  apiBase: 'https://wx-auth.shenzjd.com',
   siteId: 'my-blog',  // 标识你的网站
   onVerified: (user) => {
     // 认证成功，允许访问内容
