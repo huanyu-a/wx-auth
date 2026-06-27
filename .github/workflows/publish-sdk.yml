@@ -36,8 +36,14 @@ jobs:
       - name: Install dependencies
         run: cd wx-auth-sdk && pnpm install
 
-      - name: Bump version
-        run: cd wx-auth-sdk && npm version patch
+      - name: Bump version from npm registry
+        run: |
+          cd wx-auth-sdk
+          CURRENT=$(npm view wx-auth-sdk version 2>/dev/null || echo "0.0.0")
+          echo "线上最新版本: $CURRENT"
+          NEXT=$(echo "$CURRENT" | awk -F. '{$NF=$NF+1}1' OFS=.)
+          echo "发布版本: $NEXT"
+          npm version "$NEXT" --no-git-tag-version
 
       - name: Build SDK
         run: cd wx-auth-sdk && pnpm build
