@@ -16,7 +16,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       id-token: write
 
     steps:
@@ -27,29 +27,25 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org
-          token: ${{ secrets.NPM_TOKEN || secrets.GITHUB_TOKEN }}
+          always-auth: false
+          check-latest: false
+
+      - name: Install pnpm
+        run: npm install -g pnpm@9
 
       - name: Install dependencies
-        run: cd wx-auth-sdk && npm install
+        run: cd wx-auth-sdk && pnpm install
 
-      - name: Bump version from npm registry
-        run: |
-          cd wx-auth-sdk
-          CURRENT=$(npm view wx-auth-sdk version 2>/dev/null || echo "0.0.0")
-          echo "线上最新版本: $CURRENT"
-          NEXT=$(echo "$CURRENT" | awk -F. '{$NF=$NF+1}1' OFS=.)
-          echo "发布版本: $NEXT"
-          npm version "$NEXT" --no-git-tag-version
+      - name: Bump version
+        run: cd wx-auth-sdk && npm version patch
 
       - name: Build SDK
-        run: cd wx-auth-sdk && npm run build
+        run: cd wx-auth-sdk && pnpm build
 
       - name: Publish to NPM
-        run: cd wx-auth-sdk && npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: cd wx-auth-sdk && npm publish --provenance --access public
 
       - name: Push version bump
         run: git push
