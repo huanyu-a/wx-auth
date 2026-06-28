@@ -113,7 +113,15 @@ SDK 初始化（apiBase + siteId）
 
 ## 🔧 其他网站接入
 
-在你的任意网站中引入 SDK，两行代码即可：
+接入方只需要配置 **1 个参数**：`siteId`（站点唯一标识）
+
+其他配置（公众号名称、二维码、API 地址）都由后端统一管理，接入方无需关心。
+
+> **核心概念：**
+> - ✅ 所有接入方共享"神族九帝"公众号
+> - ✅ `wechatName` 和 `qrcodeUrl` 从后端自动获取
+> - ✅ `apiBase` 已配置默认值，可省略
+> - ✅ `siteId` 是唯一需要配置的参数（用于统计来源）
 
 ### 认证模式选择
 
@@ -125,9 +133,8 @@ SDK 支持两种认证模式，根据你的业务场景选择：
 
 ```typescript
 WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',
-  siteId: 'paid-content',
-  required: true,  // 强制认证（默认值）
+  siteId: 'paid-content',  // ← 唯一需要配置的参数
+  required: true,  // 强制认证（默认值，可省略）
   onVerified: (user) => {
     console.log('认证成功', user);
     // 解锁付费内容
@@ -146,8 +153,7 @@ WxAuth.init({
 
 ```typescript
 WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',
-  siteId: 'my-blog',
+  siteId: 'my-blog',  // ← 唯一需要配置的参数
   required: false,  // 可选认证
   onVerified: (user) => {
     console.log('认证成功', user);
@@ -176,11 +182,10 @@ npm install wx-auth-sdk
 import { WxAuth } from 'wx-auth-sdk';
 import 'wx-auth-sdk/dist/style.css';
 
+// ✅ 最简单的接入方式（只需 3 行代码）
 WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',  // 认证服务地址
-  siteId: 'my-blog',                         // 你的网站标识
-  required: false,                           // 可选认证，显示关闭按钮
-  // wechatName 和 qrcodeUrl 自动从后端获取
+  siteId: 'my-blog',        // 你的网站标识（必填）
+  required: false,          // 可选认证（可选）
   onVerified: (user) => {
     console.log('认证成功', user);
   },
@@ -190,16 +195,18 @@ WxAuth.init({
 });
 ```
 
-### CDN 方式
+> **说明：**
+> - `apiBase` 和 `wechatName` 和 `qrcodeUrl` 都无需配置，自动从后端获取
+> - 接入方配置自己的公众号名称和二维码**无效**（统一使用后端配置的"神族九帝"公众号）
 
 ```html
 <link rel="stylesheet" href="https://unpkg.com/wx-auth-sdk/dist/wx-auth.css">
 <script src="https://unpkg.com/wx-auth-sdk/dist/wx-auth.umd.js"></script>
 <script>
   WxAuth.init({
-    apiBase: 'https://wx-auth.shenzjd.com',
-    siteId: 'my-blog',
-    required: false,  // 可选认证
+    apiBase: 'https://wx-auth.shenzjd.com',  // ← 可省略（已有默认值）
+    siteId: 'my-blog',                        // ← 唯一需要配置的参数
+    required: false,                          // 可选认证，显示关闭按钮
     onVerified: (user) => {
       console.log('认证成功', user);
     },
@@ -214,20 +221,21 @@ WxAuth.init({
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `apiBase` | `string` | ✅ | 认证服务后端地址 |
-| `siteId` | `string` | ❌ | 站点标识，区分不同接入网站 |
-| `required` | `boolean` | ❌ | 是否必须认证（默认 true，强制认证） |
-| `wechatName` | `string` | ❌ | 公众号名称（自动获取） |
-| `qrcodeUrl` | `string` | ❌ | 二维码 URL（自动获取） |
+| `siteId` | `string` | ✅ | **站点唯一标识**（必填，用于统计来源） |
+| `apiBase` | `string` | ❌ | 认证服务后端地址（**已有默认值**，可省略） |
+| `required` | `boolean` | ❌ | 是否必须认证（默认 `true`，强制认证） |
 | `onVerified` | `(user) => void` | ❌ | 验证成功回调 |
 | `onError` | `(error) => void` | ❌ | 错误回调 |
-| `onClose` | `() => void` | ❌ | 用户关闭弹窗回调（仅在 required=false 时触发） |
+| `onClose` | `() => void` | ❌ | 用户关闭弹窗回调（仅在 `required=false` 时触发） |
+
+> **说明：**
+> - **`wechatName` 和 `qrcodeUrl` 无需配置**，会自动从后端获取
+> - 接入方配置自己的公众号名称和二维码**无效**（统一使用后端配置的"神族九帝"公众号）
+> - **`siteId` 是唯一需要配置的参数**（用于区分不同接入网站）
 
 > **认证模式说明：**
 > - `required: true`（默认）- 强制认证，不显示关闭按钮，必须完成认证
 > - `required: false` - 可选认证，显示关闭按钮，可跳过认证
-
-> 同域部署（如认证服务首页）时，`apiBase` 可留空，自动使用当前域名。
 
 ---
 

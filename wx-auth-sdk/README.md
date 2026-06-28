@@ -15,84 +15,91 @@ npm install wx-auth-sdk
 <script src="https://cdn.example.com/wx-auth.umd.js"></script>
 ```
 
-## 🚀 快速开始
+## 🚀 极简接入
 
-### ES Module
+### 核心概念
+
+**接入方只需要配置 1 个参数：`siteId`**
+
+其他配置（公众号名称、二维码、API 地址）都由后端统一管理，自动下发。
+
 ```typescript
 import { WxAuth } from 'wx-auth-sdk';
 import 'wx-auth-sdk/dist/style.css';
 
-// 强制认证模式（默认）
+// 一行代码完成接入
 WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',
-  siteId: 'my-website',  // 可选，标识你的网站
-  required: true,  // 必须认证，不显示关闭按钮
-  // wechatName 和 qrcodeUrl 会自动从后端获取，也可以手动指定
+  siteId: 'my-website',  // ← 唯一需要配置的参数
   onVerified: (user) => {
     console.log('认证成功', user);
-  },
-  onError: (error) => {
-    console.error('认证失败', error);
   }
 });
+```
 
-// 可选认证模式
+就是这么简单！✅
+
+### 认证模式选择
+
+SDK 支持两种认证模式：
+
+#### 强制认证模式（默认）
+
+适用于**内容付费、会员系统、内测邀请**等场景，用户必须完成认证才能继续使用：
+
+```typescript
 WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',
-  siteId: 'my-blog',
-  required: false,  // 可选认证，显示关闭按钮
+  siteId: 'paid-content',
+  required: true,  // 强制认证（默认值，可省略）
   onVerified: (user) => {
     console.log('认证成功', user);
+    // 解锁付费内容
+  }
+});
+```
+
+**特点：**
+- ❌ 不显示关闭按钮
+- ❌ 点击遮罩层无效
+- ✅ 必须完成认证才能继续操作
+
+#### 可选认证模式
+
+适用于**博客、资讯、社区**等场景，用户可以选择跳过认证：
+
+```typescript
+WxAuth.init({
+  siteId: 'my-blog',
+  required: false,  // 可选认证
+  onVerified: (user) => {
+    console.log('认证成功', user);
+    // 解锁评论、点赞等功能
   },
   onClose: () => {
     console.log('用户关闭了认证弹窗');
-    // 处理用户关闭后的逻辑
+    // 处理关闭后的逻辑，如显示受限模式
   }
 });
 ```
 
-### UMD（浏览器脚本）
-```html
-<link rel="stylesheet" href="./dist/wx-auth.css">
-<script src="./dist/wx-auth.umd.js"></script>
-<script>
-  // 强制认证模式
-  WxAuth.init({
-    apiBase: 'https://wx-auth.shenzjd.com',
-    siteId: 'my-website',
-    required: true,  // 必须认证
-    onVerified: (user) => {
-      console.log('认证成功', user);
-    }
-  });
+**特点：**
+- ✅ 显示关闭按钮（右上角 ×）
+- ✅ 点击遮罩可关闭弹窗
+- ✅ 关闭时触发 `onClose` 回调
 
-  // 可选认证模式
-  WxAuth.init({
-    apiBase: 'https://wx-auth.shenzjd.com',
-    siteId: 'my-blog',
-    required: false,  // 可选认证
-    onVerified: (user) => {
-      console.log('认证成功', user);
-    },
-    onClose: () => {
-      console.log('用户关闭了认证弹窗');
-    }
-  });
-</script>
-```
-
-## ⚙️ 配置选项
+## ⚙️ 配置说明
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `apiBase` | `string` | ✅ | 后端 API 地址 |
-| `siteId` | `string` | ❌ | 站点标识，用于区分不同接入网站 |
-| `wechatName` | `string` | ❌ | 公众号名称（可选，自动从后端获取） |
-| `qrcodeUrl` | `string` | ❌ | 二维码图片 URL（可选，自动从后端获取） |
-| `required` | `boolean` | ❌ | 是否必须认证（默认 true，强制认证） |
+| `siteId` | `string` | ✅ | **站点唯一标识**（必填，用于区分不同网站） |
+| `apiBase` | `string` | ❌ | 后端 API 地址（**默认值已配置**，可省略） |
+| `required` | `boolean` | ❌ | 是否必须认证（默认 `true`，强制认证） |
 | `onVerified` | `(user) => void` | ❌ | 验证成功回调 |
 | `onError` | `(error) => void` | ❌ | 错误回调 |
-| `onClose` | `() => void` | ❌ | 用户关闭弹窗回调（仅在 required=false 时触发） |
+| `onClose` | `() => void` | ❌ | 用户关闭弹窗回调（仅在 `required=false` 时触发） |
+
+> **说明：**
+> - **`wechatName` 和 `qrcodeUrl` 无需配置**，会自动从后端获取
+> - 接入方配置自己的公众号名称和二维码**无效**（认证流程统一走后端配置的公众号）
 
 ## 🔧 API 方法
 
@@ -110,10 +117,7 @@ WxAuth.init({
 **返回：** `Promise<boolean>` - 验证成功返回 `true`
 
 ### `WxAuth.close()`
-关闭认证弹窗。此方法会：
-1. 隐藏弹窗
-2. 触发 `onClose` 回调（如果已配置）
-3. 如果是通过 `requireAuth()` 调用的，会返回 `false`
+关闭认证弹窗。
 
 **场景：**
 - 用户手动关闭弹窗 → 触发 `onClose` 回调
@@ -126,8 +130,7 @@ WxAuth.init({
 - ✅ **键盘导航** - 支持退格、方向键
 - ✅ **自动验证** - 输入完成自动提交
 - ✅ **静默认证** - 有 Cookie 时不显示弹窗
-- ✅ **灵活配置** - 支持强制/可选认证模式
-- ✅ **关闭回调** - 可选认证时支持关闭事件监听
+- ✅ **灵活认证** - 支持强制/可选认证模式
 - ✅ **防删除保护** - MutationObserver + 定时器
 
 ## 📦 构建产物
@@ -168,7 +171,7 @@ SDK 初始化
     ↓
 未认证？ → 显示弹窗（二维码 + 6位输入框）
     ↓
-用户扫码关注公众号
+用户扫码关注公众号（神族九帝）
     ↓
 公众号自动回复验证码
     ↓
@@ -184,93 +187,64 @@ SDK 初始化
 - **Cookie**：HttpOnly + SameSite=Lax
 - **防删除**：双重保护机制
 
-## 🎯 使用场景
+## 💡 使用场景
 
-### 1. 独立网站集成
+### 场景 1：强制认证（内容付费）
+
 ```typescript
-import { WxAuth } from 'wx-auth-sdk';
-
-// 强制认证模式（默认）
 WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',
-  siteId: 'my-blog',  // 标识你的网站
-  required: true,  // 必须认证，不显示关闭按钮
+  siteId: 'paid-content',
+  required: true,  // 必须认证
   onVerified: (user) => {
-    // 认证成功，允许访问内容
-    showContent();
-  }
-});
-
-// 可选认证模式
-WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',
-  siteId: 'my-blog',
-  required: false,  // 可选认证，显示关闭按钮
-  onVerified: (user) => {
-    // 认证成功，允许访问内容
-    showContent();
-  },
-  onClose: () => {
-    // 用户关闭弹窗，可以显示提示或执行其他逻辑
-    console.log('用户取消了认证');
-    showMessage('您已取消认证，部分功能可能受限');
+    // 解锁付费内容
+    unlockPremiumContent();
   }
 });
 ```
 
-### 2. 现有系统集成
+### 场景 2：可选认证（博客/资讯）
 
 ```typescript
-// 在用户点击"登录"时触发
-loginButton.onclick = async () => {
+WxAuth.init({
+  siteId: 'my-blog',
+  required: false,  // 可选认证
+  onVerified: (user) => {
+    // 解锁评论、点赞等功能
+    enableSocialFeatures();
+  },
+  onClose: () => {
+    // 用户跳过认证，显示受限内容
+    showLimitedMode();
+  }
+});
+```
+
+### 场景 3：按需触发认证
+
+```typescript
+// 用户点击"登录"或"切换账号"时触发
+async function handleLogin() {
   const success = await WxAuth.requireAuth();
   if (success) {
-    // 继续原有登录流程
+    // 认证成功，继续登录流程
+    await login();
+  } else {
+    // 用户关闭弹窗，取消登录
+    console.log('用户取消认证');
   }
-};
-```
-
-### 2.1 监听关闭事件
-
-```typescript
-WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',
-  required: false,  // 必须设置为 false 才能关闭
-  onVerified: (user) => {
-    // 认证成功，允许访问内容
-    showContent();
-  },
-  onClose: () => {
-    // 用户关闭弹窗，可以显示提示或执行其他逻辑
-    console.log('用户取消了认证');
-    showMessage('您已取消认证，部分功能可能受限');
-  }
-});
-```
-
-### 2.2 使用 requireAuth + onClose
-
-```typescript
-// 在需要认证的页面中
-async function accessProtectedContent() {
-  // 如果用户关闭弹窗，返回 false
-  const authenticated = await WxAuth.requireAuth();
-  if (!authenticated) {
-    // 用户关闭弹窗，显示受限内容或提示
-    showLimitedContent();
-    return;
-  }
-  // 认证成功，显示完整内容
-  showFullContent();
 }
 ```
 
-### 3. 重新认证/切换账号
+### 场景 4：切换账号
+
 ```typescript
-// 用户点击"切换账号"
-switchAccountButton.onclick = async () => {
+// 用户点击"切换账号"时触发
+async function handleSwitchAccount() {
+  // 删除旧 Cookie
+  document.cookie = 'wxauth-openid=; path=/; max-age=0';
+  // 重新认证
   await WxAuth.requireAuth();
-};
+}
 ```
 
 ## 📚 完整文档
@@ -292,6 +266,6 @@ MIT License
 
 ---
 
-**版本**: 1.1.0
-**构建时间**: 2025-12-30
+**版本**: 1.2.0
+**构建时间**: 2025-06-28
 **状态**: ✅ 生产就绪
