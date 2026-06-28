@@ -38,8 +38,28 @@ jobs:
       - name: Install dependencies
         run: cd wx-auth-sdk && pnpm install
 
+      - name: Get latest NPM version
+        id: get-version
+        run: |
+          cd wx-auth-sdk
+          # 获取 NPM 上的最新版本
+          LATEST_VERSION=$(npm view wx-auth-sdk version 2>/dev/null || echo "0.0.0")
+          echo "Latest NPM version: $LATEST_VERSION"
+
+          # 解析版本号并升级
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
+          NEW_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+          echo "New version: $NEW_VERSION"
+
+          # 设置 GitHub Actions 输出
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "bumped=$NEW_VERSION" >> $GITHUB_ENV
+
       - name: Bump version
-        run: cd wx-auth-sdk && npm version patch
+        run: |
+          cd wx-auth-sdk
+          npm version ${{ steps.get-version.outputs.version }} --no-git-tag-version
+          echo "Bumped to $(node -p "require('./package.json').version")"
 
       - name: Build SDK
         run: cd wx-auth-sdk && pnpm build
