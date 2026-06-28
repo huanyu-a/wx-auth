@@ -22,15 +22,31 @@ npm install wx-auth-sdk
 import { WxAuth } from 'wx-auth-sdk';
 import 'wx-auth-sdk/dist/style.css';
 
+// 强制认证模式（默认）
 WxAuth.init({
   apiBase: 'https://wx-auth.shenzjd.com',
   siteId: 'my-website',  // 可选，标识你的网站
+  required: true,  // 必须认证，不显示关闭按钮
   // wechatName 和 qrcodeUrl 会自动从后端获取，也可以手动指定
   onVerified: (user) => {
     console.log('认证成功', user);
   },
   onError: (error) => {
     console.error('认证失败', error);
+  }
+});
+
+// 可选认证模式
+WxAuth.init({
+  apiBase: 'https://wx-auth.shenzjd.com',
+  siteId: 'my-blog',
+  required: false,  // 可选认证，显示关闭按钮
+  onVerified: (user) => {
+    console.log('认证成功', user);
+  },
+  onClose: () => {
+    console.log('用户关闭了认证弹窗');
+    // 处理用户关闭后的逻辑
   }
 });
 ```
@@ -40,11 +56,26 @@ WxAuth.init({
 <link rel="stylesheet" href="./dist/wx-auth.css">
 <script src="./dist/wx-auth.umd.js"></script>
 <script>
+  // 强制认证模式
   WxAuth.init({
     apiBase: 'https://wx-auth.shenzjd.com',
-    siteId: 'my-website',  // 可选，标识你的网站
+    siteId: 'my-website',
+    required: true,  // 必须认证
     onVerified: (user) => {
       console.log('认证成功', user);
+    }
+  });
+
+  // 可选认证模式
+  WxAuth.init({
+    apiBase: 'https://wx-auth.shenzjd.com',
+    siteId: 'my-blog',
+    required: false,  // 可选认证
+    onVerified: (user) => {
+      console.log('认证成功', user);
+    },
+    onClose: () => {
+      console.log('用户关闭了认证弹窗');
     }
   });
 </script>
@@ -58,8 +89,10 @@ WxAuth.init({
 | `siteId` | `string` | ❌ | 站点标识，用于区分不同接入网站 |
 | `wechatName` | `string` | ❌ | 公众号名称（可选，自动从后端获取） |
 | `qrcodeUrl` | `string` | ❌ | 二维码图片 URL（可选，自动从后端获取） |
+| `required` | `boolean` | ❌ | 是否必须认证（默认 true，强制认证） |
 | `onVerified` | `(user) => void` | ❌ | 验证成功回调 |
 | `onError` | `(error) => void` | ❌ | 错误回调 |
+| `onClose` | `() => void` | ❌ | 用户关闭弹窗回调（仅在 required=false 时触发） |
 
 ## 🔧 API 方法
 
@@ -77,80 +110,14 @@ WxAuth.init({
 **返回：** `Promise<boolean>` - 验证成功返回 `true`
 
 ### `WxAuth.close()`
-关闭认证弹窗。
+关闭认证弹窗。此方法会：
+1. 隐藏弹窗
+2. 触发 `onClose` 回调（如果已配置）
+3. 如果是通过 `requireAuth()` 调用的，会返回 `false`
 
-## 🛡️ 弹窗保护机制
-
-SDK 内置防删除保护，防止用户从控制台删除认证弹窗：
-
-### 双重检测机制
-
-1. **MutationObserver（实时检测）**
-   - 监听 DOM 变化
-   - 响应时间：< 100ms
-   - 检测场景：`remove()`、`style.display='none'`、`innerHTML=''`
-
-2. **定时器兜底（每秒检查）**
-   - 每秒检查一次弹窗状态
-   - 最大延迟：1 秒
-   - 防止 MutationObserver 被绕过
-
-### 保护流程
-```
-启用保护 → MutationObserver 监听 → 检测到攻击？→ 立即恢复（< 100ms）
-    ↓
-定时器检查（每秒） → 检测到异常？→ 恢复（≤ 1000ms）
-```
-
-## 📋 后端 API 要求
-
-SDK 需要以下后端 API 端点：
-
-### 1. SDK 配置获取（可选，推荐）
-```
-GET /api/sdk/config?siteId={siteId}
-```
-
-**响应：**
-```json
-{
-  "wechatName": "公众号名称",
-  "qrcodeUrl": "https://example.com/qrcode.jpg",
-  "codeLength": 6
-}
-```
-
-> 当 `wechatName` 和 `qrcodeUrl` 未在 `init()` 中手动指定时，SDK 会自动从该接口获取。
-
-### 2. 认证检查
-```
-GET /api/auth/check?authToken={code}&siteId={siteId}  // 通过验证码验证
-GET /api/auth/check?openid={openid}&siteId={siteId}   // 通过 OpenID 验证
-```
-
-**响应：**
-```json
-{
-  "authenticated": true,
-  "user": {
-    "openid": "oxxx...",
-    "nickname": "用户昵称",
-    "headimgurl": "头像URL"
-  }
-}
-```
-
-### 2. Session 管理
-```
-POST /api/auth/session   // 创建 Session
-GET /api/auth/session    // 获取 Session
-DELETE /api/auth/session // 删除 Session
-```
-
-### 3. 微信消息处理
-```
-POST /api/wechat/message // 微信消息接收/回复
-```
+**场景：**
+- 用户手动关闭弹窗 → 触发 `onClose` 回调
+- 调用 `requireAuth()` 后关闭 → Promise resolve(false)
 
 ## 🎨 用户体验特性
 
@@ -159,6 +126,8 @@ POST /api/wechat/message // 微信消息接收/回复
 - ✅ **键盘导航** - 支持退格、方向键
 - ✅ **自动验证** - 输入完成自动提交
 - ✅ **静默认证** - 有 Cookie 时不显示弹窗
+- ✅ **灵活配置** - 支持强制/可选认证模式
+- ✅ **关闭回调** - 可选认证时支持关闭事件监听
 - ✅ **防删除保护** - MutationObserver + 定时器
 
 ## 📦 构建产物
@@ -221,17 +190,36 @@ SDK 初始化
 ```typescript
 import { WxAuth } from 'wx-auth-sdk';
 
+// 强制认证模式（默认）
 WxAuth.init({
   apiBase: 'https://wx-auth.shenzjd.com',
   siteId: 'my-blog',  // 标识你的网站
+  required: true,  // 必须认证，不显示关闭按钮
   onVerified: (user) => {
     // 认证成功，允许访问内容
     showContent();
   }
 });
+
+// 可选认证模式
+WxAuth.init({
+  apiBase: 'https://wx-auth.shenzjd.com',
+  siteId: 'my-blog',
+  required: false,  // 可选认证，显示关闭按钮
+  onVerified: (user) => {
+    // 认证成功，允许访问内容
+    showContent();
+  },
+  onClose: () => {
+    // 用户关闭弹窗，可以显示提示或执行其他逻辑
+    console.log('用户取消了认证');
+    showMessage('您已取消认证，部分功能可能受限');
+  }
+});
 ```
 
 ### 2. 现有系统集成
+
 ```typescript
 // 在用户点击"登录"时触发
 loginButton.onclick = async () => {
@@ -240,6 +228,41 @@ loginButton.onclick = async () => {
     // 继续原有登录流程
   }
 };
+```
+
+### 2.1 监听关闭事件
+
+```typescript
+WxAuth.init({
+  apiBase: 'https://wx-auth.shenzjd.com',
+  required: false,  // 必须设置为 false 才能关闭
+  onVerified: (user) => {
+    // 认证成功，允许访问内容
+    showContent();
+  },
+  onClose: () => {
+    // 用户关闭弹窗，可以显示提示或执行其他逻辑
+    console.log('用户取消了认证');
+    showMessage('您已取消认证，部分功能可能受限');
+  }
+});
+```
+
+### 2.2 使用 requireAuth + onClose
+
+```typescript
+// 在需要认证的页面中
+async function accessProtectedContent() {
+  // 如果用户关闭弹窗，返回 false
+  const authenticated = await WxAuth.requireAuth();
+  if (!authenticated) {
+    // 用户关闭弹窗，显示受限内容或提示
+    showLimitedContent();
+    return;
+  }
+  // 认证成功，显示完整内容
+  showFullContent();
+}
 ```
 
 ### 3. 重新认证/切换账号

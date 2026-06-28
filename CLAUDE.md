@@ -73,6 +73,7 @@ pnpm type-check       # TypeScript 类型检查
 3. 未认证 → 显示弹窗（二维码 + 6位输入框）
 4. 用户扫码 + 输入验证码
 5. 验证成功 → 保存 Cookie + 回调
+6. 用户关闭弹窗 → 触发 `onClose` 回调
 
 ## 关键配置
 
@@ -96,12 +97,19 @@ STORAGE_TYPE=file  # 或 sqlite
 ```typescript
 WxAuth.init({
   apiBase: 'https://wx-auth.shenzjd.com',      // 后端 API 地址
+  required: false,                             // 是否必须认证（默认 true）
   wechatName: '神族九帝',                    // 公众号名称
   qrcodeUrl: 'https://.../qrcode.jpg',      // 二维码 URL
   onVerified: (user) => { ... },            // 验证成功回调
-  onError: (error) => { ... }               // 错误回调
+  onError: (error) => { ... },             // 错误回调
+  onClose: () => { ... }                    // 关闭弹窗回调（仅 required=false 时触发）
 });
 ```
+
+### required 模式
+- **true（默认）** - 强制认证，不显示关闭按钮，点击遮罩无效
+- **false** - 可选认证，显示关闭按钮，点击遮罩可关闭，支持 `onClose` 回调
+
 
 ## 核心特性
 
@@ -133,18 +141,34 @@ WxAuth.init({
 
 ## 认证流程
 
+### 强制认证模式（required=true，默认）
+
 ```
 用户访问 → 检查 Cookie
     ↓
 已认证？ → 静默通过
     ↓
-未认证？ → 显示弹窗（二维码 + 输入框）
+未认证？ → 显示弹窗（无关闭按钮）
     ↓
 用户扫码关注公众号 → 公众号自动回复验证码
     ↓
 用户输入 6 位验证码 → 验证
     ↓
 成功 → 保存 Cookie + 回调
+```
+
+### 可选认证模式（required=false）
+
+```
+用户访问 → 检查 Cookie
+    ↓
+已认证？ → 静默通过
+    ↓
+未认证？ → 显示弹窗（有关闭按钮）
+    ↓
+用户选择：
+    - 扫码认证 → 完成验证 → 保存 Cookie
+    - 关闭弹窗 → 触发 onClose 回调 → 继续浏览
 ```
 
 ## 注意事项

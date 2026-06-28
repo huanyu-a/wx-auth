@@ -12,7 +12,21 @@
       "Bash(dig *)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(gh run *)",
+      "Bash(git rm *)",
+      "WebFetch(domain:blog.shenzjd.com)",
+      "WebFetch(domain:panhub.shenzjd.com)",
+      "Bash(nslookup *)",
+      "Bash(ping *)",
+      "Bash(nc *)",
+      "Bash(pnpm type-check *)",
+      "Bash(pnpm --filter wx-auth-sdk build)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(node -e \"require\\('fs'\\).readFileSync\\('wx-auth-sdk/src/wx-auth.ts', 'utf8'\\)\")",
+      "Bash(npm run *)",
+      "Bash(git diff *)"
     ]
   }
 }

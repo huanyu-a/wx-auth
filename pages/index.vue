@@ -241,6 +241,7 @@ onMounted(async () => {
   WxAuth.init({
     apiBase: API_BASE,
     siteId: SITE_ID,
+    required: false, // 可选认证，允许用户关闭弹窗
     wechatName: WECHAT_NAME,
     qrcodeUrl: WECHAT_QRCODE_URL,
     onVerified: (user) => {
@@ -250,6 +251,10 @@ onMounted(async () => {
     onError: (error) => {
       console.error("[Index] 错误", error);
       // SDK 内部会处理错误显示
+    },
+    onClose: () => {
+      console.log("[Index] 用户关闭了认证弹窗");
+      // 可以在这里添加自定义逻辑，比如显示提示等
     },
   });
 

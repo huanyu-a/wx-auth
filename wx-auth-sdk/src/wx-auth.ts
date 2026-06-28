@@ -32,6 +32,8 @@ interface WxAuthConfig {
   siteId?: string;
   onVerified?: ((user: any) => void) | null;
   onError?: ((error: any) => void) | null;
+  onClose?: (() => void) | null; // 关闭弹窗回调（仅在 required=false 时触发）
+  required?: boolean; // 是否必须认证（true=强制认证，false=可选认证）
   wechatName?: string;
   qrcodeUrl?: string;
 }
@@ -49,6 +51,8 @@ const DEFAULT_CONFIG: WxAuthConfig = {
   siteId: "", // 站点标识（可选，用于区分来源网站）
   onVerified: null, // 验证成功回调
   onError: null, // 错误回调
+  onClose: null, // 关闭弹窗回调（仅在 required=false 时触发）
+  required: true, // 是否必须认证（默认强制认证）
   wechatName: "公众号", // 公众号名称（可选，会自动获取）
   qrcodeUrl: "", // 二维码URL（可选，会自动获取）
 };
@@ -153,12 +157,24 @@ const UI = {
     modal.id = "wx-auth-modal";
     modal.className = "wx-auth-modal";
 
+    // 根据 required 配置添加类名
+    if (config.required) {
+      modal.classList.add("wx-auth-required");
+    } else {
+      modal.classList.add("wx-auth-optional");
+    }
+
+    // 根据 required 配置决定是否显示关闭按钮
+    const closeButton = config.required
+      ? ""
+      : `<button class="wx-auth-close" onclick="WxAuth.close()">×</button>`;
+
     modal.innerHTML = `
-      <div class="wx-auth-overlay"></div>
+      <div class="wx-auth-overlay" ${config.required ? 'onclick="event.preventDefault()"' : ''}></div>
       <div class="wx-auth-content">
         <div class="wx-auth-header">
           <div class="wx-auth-title">微信认证</div>
-          <button class="wx-auth-close" onclick="WxAuth.close()">×</button>
+          ${closeButton}
         </div>
         <div class="wx-auth-body">
           <!-- 二维码区域 -->
@@ -253,6 +269,14 @@ const UI = {
     let modal = document.getElementById("wx-auth-modal");
     if (!modal) {
       modal = this.createModal();
+    } else {
+      // 确保弹窗有正确的 required 类
+      modal.classList.remove("wx-auth-required", "wx-auth-optional");
+      if (config.required) {
+        modal.classList.add("wx-auth-required");
+      } else {
+        modal.classList.add("wx-auth-optional");
+      }
     }
     modal.style.display = "flex";
     state.isOpen = true;
@@ -534,6 +558,10 @@ export const WxAuth = {
     if (state.resolveAuth) {
       state.resolveAuth(false);
       state.resolveAuth = null;
+    }
+    // 触发关闭回调
+    if (typeof config.onClose === "function") {
+      config.onClose();
     }
   },
 

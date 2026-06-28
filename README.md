@@ -14,6 +14,7 @@
 - ✅ **自动配置** - wechatName 和 qrcodeUrl 由后端自动下发，接入方无需关心
 - ✅ **安全可靠** - AES-256-GCM 加密 Session
 - ✅ **轻量 SDK** - < 12KB，零依赖，支持 ES Module 和 UMD
+- ✅ **灵活认证** - 支持强制认证（required=true）和可选认证（required=false）
 - ✅ **Docker 部署** - push main 自动构建部署
 
 ---
@@ -114,6 +115,57 @@ SDK 初始化（apiBase + siteId）
 
 在你的任意网站中引入 SDK，两行代码即可：
 
+### 认证模式选择
+
+SDK 支持两种认证模式，根据你的业务场景选择：
+
+#### 1. 强制认证模式（`required: true`）
+
+适用于**内容付费、会员系统、内测邀请**等场景，用户必须完成认证才能继续使用：
+
+```typescript
+WxAuth.init({
+  apiBase: 'https://wx-auth.shenzjd.com',
+  siteId: 'paid-content',
+  required: true,  // 强制认证（默认值）
+  onVerified: (user) => {
+    console.log('认证成功', user);
+    // 解锁付费内容
+  }
+});
+```
+
+**特点：**
+- ❌ 不显示关闭按钮
+- ❌ 点击遮罩层无效
+- ✅ 必须完成认证才能继续操作
+
+#### 2. 可选认证模式（`required: false`）
+
+适用于**博客、资讯、社区**等场景，用户可以选择跳过认证：
+
+```typescript
+WxAuth.init({
+  apiBase: 'https://wx-auth.shenzjd.com',
+  siteId: 'my-blog',
+  required: false,  // 可选认证
+  onVerified: (user) => {
+    console.log('认证成功', user);
+    // 解锁评论、点赞等功能
+  },
+  onClose: () => {
+    console.log('用户关闭了认证弹窗');
+    // 处理关闭后的逻辑，如显示受限模式
+  }
+});
+```
+
+**特点：**
+- ✅ 显示关闭按钮（右上角 ×）
+- ✅ 点击遮罩可关闭弹窗
+- ✅ 提示文字"（可点击右上角关闭）"
+- ✅ 关闭时触发 `onClose` 回调
+
 ### NPM 方式
 
 ```bash
@@ -127,9 +179,13 @@ import 'wx-auth-sdk/dist/style.css';
 WxAuth.init({
   apiBase: 'https://wx-auth.shenzjd.com',  // 认证服务地址
   siteId: 'my-blog',                         // 你的网站标识
+  required: false,                           // 可选认证，显示关闭按钮
   // wechatName 和 qrcodeUrl 自动从后端获取
   onVerified: (user) => {
     console.log('认证成功', user);
+  },
+  onClose: () => {
+    console.log('用户关闭了认证弹窗');
   }
 });
 ```
@@ -143,8 +199,12 @@ WxAuth.init({
   WxAuth.init({
     apiBase: 'https://wx-auth.shenzjd.com',
     siteId: 'my-blog',
+    required: false,  // 可选认证
     onVerified: (user) => {
       console.log('认证成功', user);
+    },
+    onClose: () => {
+      console.log('用户关闭了认证弹窗');
     }
   });
 </script>
@@ -156,10 +216,16 @@ WxAuth.init({
 |------|------|------|------|
 | `apiBase` | `string` | ✅ | 认证服务后端地址 |
 | `siteId` | `string` | ❌ | 站点标识，区分不同接入网站 |
+| `required` | `boolean` | ❌ | 是否必须认证（默认 true，强制认证） |
 | `wechatName` | `string` | ❌ | 公众号名称（自动获取） |
 | `qrcodeUrl` | `string` | ❌ | 二维码 URL（自动获取） |
 | `onVerified` | `(user) => void` | ❌ | 验证成功回调 |
 | `onError` | `(error) => void` | ❌ | 错误回调 |
+| `onClose` | `() => void` | ❌ | 用户关闭弹窗回调（仅在 required=false 时触发） |
+
+> **认证模式说明：**
+> - `required: true`（默认）- 强制认证，不显示关闭按钮，必须完成认证
+> - `required: false` - 可选认证，显示关闭按钮，可跳过认证
 
 > 同域部署（如认证服务首页）时，`apiBase` 可留空，自动使用当前域名。
 
