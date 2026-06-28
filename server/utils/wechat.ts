@@ -209,10 +209,10 @@ export function generateWeChatReply(message: WeChatMessage): string {
 }
 
 /**
- * 生成6位随机认证码
+ * 生成6位随机认证码（密码学安全）
  */
 export function generateVerificationCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 }
 
 /**

@@ -103,14 +103,16 @@ const utils = {
     date.setTime(date.getTime() + 30 * 24 * 60 * 60 * 1000);
     const domain = this.getRootDomain();
     const domainStr = domain ? `;domain=${domain}` : '';
-    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/${domainStr}`;
+    const isSecure = window.location.protocol === 'https:';
+    const secureStr = isSecure ? ';Secure' : '';
+    document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/${domainStr}${secureStr};SameSite=Strict`;
   },
 
   // 删除Cookie（匹配相同的 domain）
   deleteCookie(name: string): void {
     const domain = this.getRootDomain();
     const domainStr = domain ? `;domain=${domain}` : '';
-    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/${domainStr}`;
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/${domainStr};SameSite=Strict`;
   },
 
   // 发送请求
@@ -418,27 +420,44 @@ export const WxAuth = {
 
   // 自动检测 Cookie 并验证（内部使用）
   async autoCheck(): Promise<boolean> {
-    const openid = utils.getCookie("wxauth-openid");
-    if (!openid) {
+    // 优先读取签名 Token Cookie，向后兼容旧版 openid Cookie
+    const signedToken = utils.getCookie("wxauth-token");
+    const legacyOpenid = utils.getCookie("wxauth-openid");
+    const token = signedToken || legacyOpenid;
+
+    if (!token) {
       // 没有 Cookie，显示弹窗
       this.showAuthModal();
       return false;
     }
 
     const siteParam = config.siteId ? `&siteId=${encodeURIComponent(config.siteId)}` : '';
+    // 使用 token 参数（签名 Token），向后兼容 openid 参数
+    const tokenParam = signedToken
+      ? `token=${encodeURIComponent(signedToken)}`
+      : `openid=${encodeURIComponent(legacyOpenid || '')}`;
 
     try {
       const result = await utils.request(
-        `${config.apiBase}/api/auth/check?openid=${openid}${siteParam}`
+        `${config.apiBase}/api/auth/check?${tokenParam}${siteParam}`
       );
 
       if (result.authenticated) {
         console.log("[WxAuth] 自动认证成功（Cookie）");
+        // 如果服务端返回了签名 Token，升级存储
+        if (result.token) {
+          utils.setCookie("wxauth-token", result.token);
+          // 清除旧的明文 openid Cookie
+          if (legacyOpenid) {
+            utils.deleteCookie("wxauth-openid");
+          }
+        }
         this.onVerified(result.user);
         return true;
       } else {
         // Cookie 无效，删除它并显示弹窗
-        utils.deleteCookie("wxauth-openid");
+        utils.deleteCookie("wxauth-token");
+        if (legacyOpenid) utils.deleteCookie("wxauth-openid");
         this.showAuthModal();
         return false;
       }
@@ -491,16 +510,27 @@ export const WxAuth = {
 
   // 主入口：需要验证时调用
   async requireAuth(): Promise<boolean> {
-    // 1. 检查本地Cookie
-    const openid = utils.getCookie("wxauth-openid");
-    if (openid) {
+    // 1. 检查本地Cookie（优先签名 Token，向后兼容旧版 openid）
+    const signedToken = utils.getCookie("wxauth-token");
+    const legacyOpenid = utils.getCookie("wxauth-openid");
+    const token = signedToken || legacyOpenid;
+
+    if (token) {
       try {
         const siteParam = config.siteId ? `&siteId=${encodeURIComponent(config.siteId)}` : '';
+        const tokenParam = signedToken
+          ? `token=${encodeURIComponent(signedToken)}`
+          : `openid=${encodeURIComponent(legacyOpenid || '')}`;
         const result = await utils.request(
-          `${config.apiBase}/api/auth/check?openid=${openid}${siteParam}`
+          `${config.apiBase}/api/auth/check?${tokenParam}${siteParam}`
         );
         if (result.authenticated) {
           console.log("[WxAuth] 已认证（Cookie）");
+          // 升级到签名 Token
+          if (result.token) {
+            utils.setCookie("wxauth-token", result.token);
+            if (legacyOpenid) utils.deleteCookie("wxauth-openid");
+          }
           this.onVerified(result.user);
           return true;
         }
@@ -543,8 +573,11 @@ export const WxAuth = {
       );
 
       if (result.authenticated) {
-        // 验证成功 - 保存到Cookie
-        if (result.user && result.user.openid) {
+        // 验证成功 - 保存签名 Token 到 Cookie
+        if (result.token) {
+          utils.setCookie("wxauth-token", result.token);
+        } else if (result.user && result.user.openid) {
+          // 向后兼容：服务端未返回 token 时存储 openid
           utils.setCookie("wxauth-openid", result.user.openid);
         }
 
