@@ -44,28 +44,126 @@ jobs:
           cd wx-auth-sdk
           # 获取 NPM 上的最新版本
           LATEST_VERSION=$(npm view wx-auth-sdk version 2>/dev/null || echo "0.0.0")
-          echo "Latest NPM version: $LATEST_VERSION"
+          echo "📦 Latest NPM version: $LATEST_VERSION"
 
           # 解析版本号并升级
           IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
           NEW_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
-          echo "New version: $NEW_VERSION"
+          echo "🚀 New version: $NEW_VERSION"
 
           # 设置 GitHub Actions 输出
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
           echo "bumped=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Bump version
+        id: bump-version
         run: |
           cd wx-auth-sdk
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "📝 Current local version: $CURRENT_VERSION"
+
+          # 保存原始版本（用于失败时回滚）
+          echo "$CURRENT_VERSION" > .version-backup
+
           npm version ${{ steps.get-version.outputs.version }} --no-git-tag-version
-          echo "Bumped to $(node -p "require('./package.json').version")"
+          BUMPED_VERSION=$(node -p "require('./package.json').version")
+          echo "✅ Bumped version: $BUMPED_VERSION"
+          echo "bumped=$BUMPED_VERSION" >> $GITHUB_ENV
+
+      - name: Verify version availability
+        id: verify-version
+        run: |
+          cd wx-auth-sdk
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "🔍 Verifying version $NEW_VERSION is available on NPM..."
+
+          # 检查版本是否已存在
+          if npm view wx-auth-sdk@$NEW_VERSION version >/dev/null 2>&1; then
+            echo "❌ ERROR: Version $NEW_VERSION already exists on NPM!"
+            echo "📋 NPM version history:"
+            npm view wx-auth-sdk versions --json | tail -10
+            exit 1
+          fi
+
+          echo "✅ Version $NEW_VERSION is available"
 
       - name: Build SDK
-        run: cd wx-auth-sdk && pnpm build
+        id: build
+        run: |
+          cd wx-auth-sdk
+          echo "🔨 Building SDK..."
+          pnpm build
+          echo "✅ Build completed"
+
+          # 验证构建产物存在
+          echo "📋 Checking build artifacts..."
+          ls -lh dist/
+
+          REQUIRED_FILES=("wx-auth.js" "wx-auth.umd.js" "wx-auth.css" "index.d.ts")
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "dist/$file" ]; then
+              echo "❌ ERROR: Missing required file: dist/$file"
+              exit 1
+            fi
+            echo "✅ dist/$file"
+          done
+
+      - name: Generate CHANGELOG
+        id: changelog
+        run: |
+          cd wx-auth-sdk
+          PREV_VERSION=${{ steps.get-version.outputs.LATEST_VERSION }}
+          NEW_VERSION=$(node -p "require('./package.json').version")
+
+          echo "📝 Generating CHANGELOG for $PREV_VERSION → $NEW_VERSION..."
+
+          # 获取两次版本之间的 commits
+          if [ "$PREV_VERSION" != "0.0.0" ]; then
+            # 从 git log 生成 changelog
+            cd ..
+            CHANGELOG=$(git log --oneline --no-merges "${PREV_VERSION}..HEAD" -- wx-auth-sdk/ || echo "")
+            echo "$CHANGELOG" > wx-auth-sdk/CHANGELOG.md
+            echo "✅ CHANGELOG generated"
+            cat wx-auth-sdk/CHANGELOG.md
+          else
+            echo "ℹ️  First release, skipping CHANGELOG"
+          fi
 
       - name: Publish to NPM
-        run: cd wx-auth-sdk && npm publish --provenance --access public
+        id: publish
+        run: |
+          cd wx-auth-sdk
+          NEW_VERSION=$(node -p "require('./package.json').version")
+
+          echo "📦 Publishing wx-auth-sdk@$NEW_VERSION to NPM..."
+          echo "📋 Package contents:"
+          npm pack --dry-run 2>&1 | head -20
+
+          # 实际发布
+          npm publish --provenance --access public
+
+          echo "✅ Successfully published wx-auth-sdk@$NEW_VERSION"
+          echo "published_version=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Push version bump
-        run: git push
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add wx-auth-sdk/package.json
+          git commit -m "chore: release wx-auth-sdk@$(node -p "require('./wx-auth-sdk/package.json').version")" || echo "No changes to commit"
+          git push
+
+      - name: Create GitHub Release
+        if: success()
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: sdk-v${{ steps.publish.outputs.published_version }}
+          name: SDK v${{ steps.publish.outputs.published_version }}
+          body_path: wx-auth-sdk/CHANGELOG.md
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
