@@ -27,7 +27,8 @@
       "Bash(node -e \"require\\('fs'\\).readFileSync\\('wx-auth-sdk/src/wx-auth.ts', 'utf8'\\)\")",
       "Bash(npm run *)",
       "Bash(git diff *)",
-      "Bash(git commit -m 'docs: 简化文档，突出 siteId 为核心配置 *)"
+      "Bash(git commit -m 'docs: 简化文档，突出 siteId 为核心配置 *)",
+      "Bash(git commit -m 'docs: 完善所有文档的公众号配置说明 *)"
     ]
   }
 }

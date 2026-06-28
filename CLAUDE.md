@@ -96,15 +96,23 @@ STORAGE_TYPE=file  # 或 sqlite
 ### SDK 配置
 ```typescript
 WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',      // 后端 API 地址
-  required: false,                             // 是否必须认证（默认 true）
-  wechatName: '神族九帝',                    // 公众号名称
-  qrcodeUrl: 'https://.../qrcode.jpg',      // 二维码 URL
-  onVerified: (user) => { ... },            // 验证成功回调
-  onError: (error) => { ... },             // 错误回调
-  onClose: () => { ... }                    // 关闭弹窗回调（仅 required=false 时触发）
+  siteId: 'my-website',                // ← 唯一必填：站点唯一标识
+  apiBase: 'https://wx-auth.shenzjd.com',  // 后端 API 地址（可选，有默认值）
+  required: false,                     // 是否必须认证（默认 true）
+  // wechatName 和 qrcodeUrl 无需配置，自动从后端获取
+  // 接入方配置自己的公众号名称和二维码无效（统一使用"神族九帝"）
+  onVerified: (user) => { ... },       // 验证成功回调
+  onError: (error) => { ... },        // 错误回调
+  onClose: () => { ... }               // 关闭弹窗回调（仅 required=false 时触发）
 });
 ```
+
+**核心概念：**
+- ✅ **`siteId` 是唯一必填参数**（用于区分不同接入网站）
+- ✅ `apiBase` 已配置默认值，可省略
+- ❌ `wechatName` 和 `qrcodeUrl` 无需配置（接入方配置无效）
+- ✅ 所有接入方共享"神族九帝"公众号
+- ✅ 认证流程统一走后端配置的公众号
 
 ### required 模式
 - **true（默认）** - 强制认证，不显示关闭按钮，点击遮罩无效
@@ -177,3 +185,4 @@ WxAuth.init({
 2. **Session 密钥**：生产环境必须使用随机字符串（`openssl rand -hex 32`）
 3. **网站地址**：`SITE_URL` 必须与微信后台配置的回调地址一致
 4. **SDK 导入**：开发时从 `../wx-auth-sdk/src/index` 导入，生产时从 NPM 包导入
+5. **公众号配置**：接入方无需配置 `wechatName` 和 `qrcodeUrl`，配置也无效（统一使用后端配置的"神族九帝"公众号）
