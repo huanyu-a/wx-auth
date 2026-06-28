@@ -4,20 +4,20 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # 复制依赖文件
-COPY package.json pnpm-lock.yaml ./
-COPY wx-auth-sdk/package.json wx-auth-sdk/pnpm-lock.yaml wx-auth-sdk/
+COPY package.json package-lock.json ./
+COPY wx-auth-sdk/package.json wx-auth-sdk/
 
-# 安装 pnpm 并安装依赖
-RUN npm install -g pnpm@9 && pnpm install --frozen-lockfile
+# 安装依赖
+RUN npm install
 
 # 安装 SDK 子项目依赖
-RUN cd wx-auth-sdk && pnpm install --frozen-lockfile && cd ..
+RUN cd wx-auth-sdk && npm install && cd ..
 
 # 复制源代码
 COPY . .
 
 # 构建项目（包括 SDK）
-RUN cd wx-auth-sdk && pnpm build && cd .. && pnpm build
+RUN cd wx-auth-sdk && npm run build && cd .. && npm run build
 
 # 运行阶段
 FROM node:20-alpine AS runtime
@@ -27,10 +27,10 @@ WORKDIR /app
 # 复制构建产物
 COPY --from=builder /app/.output /app/.output
 COPY --from=builder /app/package.json /app/package.json
-COPY --from=builder /app/pnpm-lock.yaml /app/pnpm-lock.yaml
+COPY --from=builder /app/package-lock.json /app/package-lock.json
 
 # 安装生产依赖（仅运行时需要）
-RUN npm install -g pnpm@9 && pnpm install --prod --frozen-lockfile
+RUN npm install --production
 
 # 创建数据目录
 RUN mkdir -p /app/data

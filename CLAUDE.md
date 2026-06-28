@@ -40,18 +40,19 @@ wx-auth/
 
 ### 主项目
 ```bash
-pnpm install          # 安装依赖
-pnpm dev              # 开发模式（http://localhost:3000）
-pnpm build            # 构建生产版本
-pnpm preview          # 预览生产构建
-pnpm generate         # 生成静态站点
+npm install          # 安装依赖
+npm run dev          # 开发模式（http://localhost:3000）
+npm run build        # 构建生产版本
+npm run preview      # 预览生产构建
+npm run generate     # 生成静态站点
 ```
 
 ### SDK 开发
 ```bash
 cd wx-auth-sdk
-pnpm build            # 构建 SDK（输出到 dist/）
-pnpm type-check       # TypeScript 类型检查
+npm install          # 安装依赖
+npm run build        # 构建 SDK（输出到 dist/）
+npm run type-check   # TypeScript 类型检查
 ```
 
 ## 核心架构

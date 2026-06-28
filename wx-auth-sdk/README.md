@@ -172,13 +172,13 @@ dist/
 
 ```bash
 # 安装依赖
-pnpm install
+npm install
 
 # 构建 SDK
-pnpm build
+npm run build
 
 # 类型检查
-pnpm type-check
+npm run type-check
 ```
 
 ## 📝 认证流程

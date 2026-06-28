@@ -55,14 +55,14 @@
 
 ```bash
 # 1. 安装依赖
-pnpm install
+npm install
 
 # 2. 配置环境变量
 cp .env.example .env
 # 编辑 .env，本地开发用原始名称即可（SITE_URL、WECHAT_TOKEN 等）
 
 # 3. 启动
-pnpm dev
+npm run dev
 ```
 
 访问：http://localhost:3000

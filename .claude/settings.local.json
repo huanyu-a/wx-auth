@@ -30,7 +30,9 @@
       "Bash(git commit -m 'docs: 简化文档，突出 siteId 为核心配置 *)",
       "Bash(git commit -m 'docs: 完善所有文档的公众号配置说明 *)",
       "Bash(git commit -m 'docs: 更新 SDK 演示页面的配置说明 *)",
-      "Bash(git commit -m 'feat: SDK 支持零配置接入，siteId 自动从 referrer/域名获取 *)"
+      "Bash(git commit -m 'feat: SDK 支持零配置接入，siteId 自动从 referrer/域名获取 *)",
+      "Bash(pnpm build *)",
+      "Bash(pnpm approve-builds *)"
     ]
   }
 }

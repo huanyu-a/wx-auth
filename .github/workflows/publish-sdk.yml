@@ -27,14 +27,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
           registry-url: https://registry.npmjs.org
 
-      - name: Install pnpm
-        run: npm install -g pnpm@9
-
       - name: Install dependencies
-        run: cd wx-auth-sdk && pnpm install
+        run: cd wx-auth-sdk && npm install
 
       - name: Bump version from npm registry
         run: |
@@ -46,10 +43,12 @@ jobs:
           npm version "$NEXT" --no-git-tag-version
 
       - name: Build SDK
-        run: cd wx-auth-sdk && pnpm build
+        run: cd wx-auth-sdk && npm run build
 
       - name: Publish to NPM
-        run: cd wx-auth-sdk && npm publish --provenance --access public
+        run: cd wx-auth-sdk && npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Push version bump
         run: git push
