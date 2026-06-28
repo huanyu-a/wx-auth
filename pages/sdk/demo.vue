@@ -96,20 +96,21 @@ WxAuth.<span class="text-blue-400">init</span>({
             </h2>
             <div class="space-y-3 text-sm">
               <div class="flex items-start gap-3">
-                <span class="inline-flex items-center justify-center px-2 py-0.5 bg-[#07C160]/10 text-[#07C160] rounded-md font-mono text-xs flex-shrink-0">apiBase</span>
-                <span class="text-slate-600">后端 API 地址（必填），当前为 <code class="bg-slate-200 px-1 rounded text-xs">auth.shenzjd.com</code></span>
-              </div>
-              <div class="flex items-start gap-3">
                 <span class="inline-flex items-center justify-center px-2 py-0.5 bg-blue-500/10 text-blue-600 rounded-md font-mono text-xs flex-shrink-0">siteId</span>
-                <span class="text-slate-600">你的网站唯一标识（推荐），用于区分不同接入网站的访问数据</span>
+                <span class="text-slate-600">你的网站唯一标识（<strong>必填</strong>），用于区分不同接入网站的访问数据</span>
               </div>
               <div class="flex items-start gap-3">
-                <span class="inline-flex items-center justify-center px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md font-mono text-xs flex-shrink-0">wechatName</span>
-                <span class="text-slate-600">公众号名称（可选），未设置时自动从后端获取</span>
+                <span class="inline-flex items-center justify-center px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md font-mono text-xs flex-shrink-0">apiBase</span>
+                <span class="text-slate-600">后端 API 地址（可选，有默认值），当前为 <code class="bg-slate-200 px-1 rounded text-xs">https://wx-auth.shenzjd.com</code></span>
               </div>
               <div class="flex items-start gap-3">
-                <span class="inline-flex items-center justify-center px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md font-mono text-xs flex-shrink-0">qrcodeUrl</span>
-                <span class="text-slate-600">二维码图片 URL（可选），未设置时自动从后端获取</span>
+                <span class="inline-flex items-center justify-center px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md font-mono text-xs flex-shrink-0">required</span>
+                <span class="text-slate-600">是否必须认证（可选，默认 <code class="bg-slate-200 px-1 rounded text-xs">true</code>）</span>
+              </div>
+              <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p class="text-sm text-yellow-800">
+                  <strong>⚠️ 注意：</strong><code class="bg-yellow-100 px-1 rounded text-xs">wechatName</code> 和 <code class="bg-yellow-100 px-1 rounded text-xs">qrcodeUrl</code> 无需配置，自动从后端获取，接入方配置也<strong>无效</strong>（统一使用"神族九帝"公众号）。
+                </p>
               </div>
             </div>
           </div>
