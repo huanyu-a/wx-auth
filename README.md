@@ -343,8 +343,8 @@ wx-auth/
 NUXT_PUBLIC_SITE_URL=https://wx-auth.shenzjd.com
 NUXT_WECHAT_TOKEN=your-wechat-token
 NUXT_SESSION_SECRET=your-random-secret
-WECHAT_NAME=你的公众号名称
-WECHAT_QRCODE_URL=https://your-cdn.com/qrcode.jpg
+NUXT_WECHAT_NAME=神族九帝
+NUXT_WECHAT_QRCODE_URL=https://cdn.jsdmirror.com/gh/wu529778790/image@master/blog/qrcode_for_gh_61da24be23ff_258.jpg
 ```
 
 ---
