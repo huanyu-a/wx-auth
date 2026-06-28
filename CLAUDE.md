@@ -64,8 +64,9 @@ pnpm type-check       # TypeScript 类型检查
 
 ### 后端 API 端点
 1. **`/api/wechat/message`** - 微信消息处理（GET/POST）
-2. **`/api/auth/check`** - 认证检查（参数：`authToken` 或 `openid`）
+2. **`/api/auth/check`** - 认证检查（参数：`authToken` 或 `openid`，可选 `siteId`）
 3. **`/api/auth/session`** - Session 管理（POST/GET/DELETE）
+4. **`/api/sdk/config`** - SDK 配置下发（返回 wechatName、qrcodeUrl）
 
 ### SDK 工作流程
 1. 检查 Cookie `wxauth-openid`
@@ -95,8 +96,15 @@ STORAGE_TYPE=file  # 或 sqlite
 
 ### SDK 配置
 ```typescript
+// ✅ 零配置接入（推荐）
 WxAuth.init({
-  siteId: 'my-website',                // ← 唯一必填：站点唯一标识
+  onVerified: (user) => { ... },  // ← 唯一必填：验证成功回调
+  onClose: () => { ... }          // ← 可选：关闭弹窗回调
+});
+
+// 或手动指定配置（可选）
+WxAuth.init({
+  siteId: 'my-website',                // ← 可选：站点唯一标识（不填则自动获取）
   apiBase: 'https://wx-auth.shenzjd.com',  // 后端 API 地址（可选，有默认值）
   required: false,                     // 是否必须认证（默认 true）
   // wechatName 和 qrcodeUrl 无需配置，自动从后端获取
@@ -108,9 +116,10 @@ WxAuth.init({
 ```
 
 **核心概念：**
-- ✅ **`siteId` 是唯一必填参数**（用于区分不同接入网站）
-- ✅ `apiBase` 已配置默认值，可省略
-- ❌ `wechatName` 和 `qrcodeUrl` 无需配置（接入方配置无效）
+- ✅ **所有参数都无需手动配置**
+  - `siteId`：自动从 `document.referrer` 或当前域名获取
+  - `apiBase`：使用默认值 `https://wx-auth.shenzjd.com`
+  - `wechatName` / `qrcodeUrl`：自动从后端获取
 - ✅ 所有接入方共享"神族九帝"公众号
 - ✅ 认证流程统一走后端配置的公众号
 
@@ -186,3 +195,4 @@ WxAuth.init({
 3. **网站地址**：`SITE_URL` 必须与微信后台配置的回调地址一致
 4. **SDK 导入**：开发时从 `../wx-auth-sdk/src/index` 导入，生产时从 NPM 包导入
 5. **公众号配置**：接入方无需配置 `wechatName` 和 `qrcodeUrl`，配置也无效（统一使用后端配置的"神族九帝"公众号）
+6. **siteId 自动获取**：SDK 会自动从 `document.referrer` 或当前域名获取 `siteId`，无需手动配置

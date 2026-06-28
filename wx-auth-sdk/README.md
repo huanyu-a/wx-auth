@@ -17,26 +17,45 @@ npm install wx-auth-sdk
 
 ## 🚀 极简接入
 
-### 核心概念
+### 零配置接入（推荐）
 
-**接入方只需要配置 1 个参数：`siteId`**
-
-其他配置（公众号名称、二维码、API 地址）都由后端统一管理，自动下发。
+**什么都不用配置，一行代码即可完成接入！**
 
 ```typescript
 import { WxAuth } from 'wx-auth-sdk';
 import 'wx-auth-sdk/dist/style.css';
 
-// 一行代码完成接入
+// ✅ 零配置 - SDK 自动获取所有信息
 WxAuth.init({
-  siteId: 'my-website',  // ← 唯一需要配置的参数
   onVerified: (user) => {
     console.log('认证成功', user);
   }
 });
 ```
 
+**SDK 会自动：**
+- ✅ 从 `document.referrer` 或当前域名自动获取 `siteId`
+- ✅ 从后端 `/api/sdk/config` 自动获取公众号名称和二维码
+- ✅ 使用默认 API 地址 `https://wx-auth.shenzjd.com`
+
 就是这么简单！✅
+
+### 自定义配置
+
+如果需要手动指定配置（可选）：
+
+```typescript
+WxAuth.init({
+  siteId: 'my-website',     // ← 可选：手动指定站点 ID（不填则自动获取）
+  required: false,           // ← 可选：认证模式（默认 true）
+  onVerified: (user) => {
+    console.log('认证成功', user);
+  },
+  onClose: () => {
+    console.log('用户关闭了认证弹窗');
+  }
+});
+```
 
 ### 认证模式选择
 
@@ -90,7 +109,7 @@ WxAuth.init({
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `siteId` | `string` | ✅ | **站点唯一标识**（必填，用于区分不同网站） |
+| `siteId` | `string` | ❌ | **站点唯一标识**（可选，自动从 referrer/域名获取） |
 | `apiBase` | `string` | ❌ | 后端 API 地址（**默认值已配置**，可省略） |
 | `required` | `boolean` | ❌ | 是否必须认证（默认 `true`，强制认证） |
 | `onVerified` | `(user) => void` | ❌ | 验证成功回调 |
@@ -98,8 +117,12 @@ WxAuth.init({
 | `onClose` | `() => void` | ❌ | 用户关闭弹窗回调（仅在 `required=false` 时触发） |
 
 > **说明：**
-> - **`wechatName` 和 `qrcodeUrl` 无需配置**，会自动从后端获取
-> - 接入方配置自己的公众号名称和二维码**无效**（认证流程统一走后端配置的公众号）
+> - ✅ **所有参数都无需手动配置**
+>   - `siteId`：自动从 `document.referrer` 或当前域名获取
+>   - `apiBase`：使用默认值 `https://wx-auth.shenzjd.com`
+>   - `wechatName` / `qrcodeUrl`：自动从后端获取
+> - ⚠️ 接入方配置自己的公众号名称和二维码**无效**（统一使用"神族九帝"公众号）
+
 
 ## 🔧 API 方法
 
@@ -189,12 +212,24 @@ SDK 初始化
 
 ## 💡 使用场景
 
-### 场景 1：强制认证（内容付费）
+### 场景 1：零配置接入（推荐）
+
+```typescript
+// ✅ 什么都不用配置，一行代码即可
+WxAuth.init({
+  onVerified: (user) => {
+    console.log('认证成功', user);
+  }
+});
+```
+
+SDK 会自动获取 `siteId`、`apiBase`、公众号名称和二维码。
+
+### 场景 2：强制认证（内容付费）
 
 ```typescript
 WxAuth.init({
-  siteId: 'paid-content',
-  required: true,  // 必须认证
+  required: true,  // 必须认证（也可省略，true 为默认值）
   onVerified: (user) => {
     // 解锁付费内容
     unlockPremiumContent();
@@ -202,11 +237,10 @@ WxAuth.init({
 });
 ```
 
-### 场景 2：可选认证（博客/资讯）
+### 场景 3：可选认证（博客/资讯）
 
 ```typescript
 WxAuth.init({
-  siteId: 'my-blog',
   required: false,  // 可选认证
   onVerified: (user) => {
     // 解锁评论、点赞等功能

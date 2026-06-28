@@ -49,13 +49,13 @@ npm install wx-auth-sdk</code></pre>
                 <pre class="text-sm text-slate-300 font-mono leading-relaxed"><code><span class="text-purple-400">import</span> { WxAuth } <span class="text-purple-400">from</span> <span class="text-yellow-300">'wx-auth-sdk'</span>;
 <span class="text-purple-400">import</span> <span class="text-yellow-300">'wx-auth-sdk/dist/style.css'</span>;
 
+<span class="text-green-400">// ✅ 零配置接入（推荐）</span>
 WxAuth.<span class="text-blue-400">init</span>({
-  apiBase: <span class="text-yellow-300">'https://wx-auth.shenzjd.com'</span>,
-  siteId: <span class="text-yellow-300">'my-website'</span>, <span class="text-slate-500">// 你的网站标识</span>
-  <span class="text-slate-500">// wechatName 和 qrcodeUrl 会自动从后端获取</span>
+  <span class="text-slate-500">// 什么都不用配置，SDK 会自动获取 siteId、apiBase 和公众号信息</span>
   onVerified: <span class="text-blue-400">(</span>user<span class="text-blue-400">)</span> <span class="text-purple-400">=></span> {
     console.log(<span class="text-yellow-300">'认证成功'</span>, user);
-  }
+  },
+  <span class="text-slate-500">// onClose: () => { ... }  // 可选认证时使用</span>
 });</code></pre>
               </div>
             </div>
@@ -76,11 +76,11 @@ WxAuth.<span class="text-blue-400">init</span>({
 
 <span class="text-red-400">&lt;script&gt;</span>
   WxAuth.<span class="text-blue-400">init</span>({
-    apiBase: <span class="text-yellow-300">'https://wx-auth.shenzjd.com'</span>,
-    siteId: <span class="text-yellow-300">'my-website'</span>,
+    <span class="text-green-400">// ✅ 零配置，所有参数自动获取</span>
     onVerified: <span class="text-blue-400">(</span>user<span class="text-blue-400">)</span> <span class="text-purple-400">=></span> {
       console.log(<span class="text-yellow-300">'认证成功'</span>, user);
-    }
+    },
+    <span class="text-slate-500">// onClose: () => { ... }  // 可选认证时使用</span>
   });
 <span class="text-red-400">&lt;/script&gt;</span></code></pre>
             </div>
@@ -96,20 +96,33 @@ WxAuth.<span class="text-blue-400">init</span>({
             </h2>
             <div class="space-y-3 text-sm">
               <div class="flex items-start gap-3">
-                <span class="inline-flex items-center justify-center px-2 py-0.5 bg-blue-500/10 text-blue-600 rounded-md font-mono text-xs flex-shrink-0">siteId</span>
-                <span class="text-slate-600">你的网站唯一标识（<strong>必填</strong>），用于区分不同接入网站的访问数据</span>
+                <span class="inline-flex items-center justify-center px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md font-mono text-xs flex-shrink-0">siteId</span>
+                <span class="text-slate-600">站点唯一标识（<strong>可选，自动获取</strong>），从 <code class="bg-slate-200 px-1 rounded text-xs">document.referrer</code> 或当前域名自动提取</span>
               </div>
               <div class="flex items-start gap-3">
                 <span class="inline-flex items-center justify-center px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md font-mono text-xs flex-shrink-0">apiBase</span>
-                <span class="text-slate-600">后端 API 地址（可选，有默认值），当前为 <code class="bg-slate-200 px-1 rounded text-xs">https://wx-auth.shenzjd.com</code></span>
+                <span class="text-slate-600">后端 API 地址（<strong>可选，已有默认值</strong>），当前为 <code class="bg-slate-200 px-1 rounded text-xs">https://wx-auth.shenzjd.com</code></span>
               </div>
               <div class="flex items-start gap-3">
                 <span class="inline-flex items-center justify-center px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md font-mono text-xs flex-shrink-0">required</span>
-                <span class="text-slate-600">是否必须认证（可选，默认 <code class="bg-slate-200 px-1 rounded text-xs">true</code>）</span>
+                <span class="text-slate-600">是否必须认证（<strong>可选</strong>，默认 <code class="bg-slate-200 px-1 rounded text-xs">true</code>）</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <span class="inline-flex items-center justify-center px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md font-mono text-xs flex-shrink-0">onVerified</span>
+                <span class="text-slate-600">验证成功回调（<strong>推荐配置</strong>）</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <span class="inline-flex items-center justify-center px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md font-mono text-xs flex-shrink-0">onClose</span>
+                <span class="text-slate-600">用户关闭弹窗回调（<strong>可选</strong>，仅在 <code class="bg-slate-200 px-1 rounded text-xs">required=false</code> 时触发）</span>
               </div>
               <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p class="text-sm text-yellow-800">
                   <strong>⚠️ 注意：</strong><code class="bg-yellow-100 px-1 rounded text-xs">wechatName</code> 和 <code class="bg-yellow-100 px-1 rounded text-xs">qrcodeUrl</code> 无需配置，自动从后端获取，接入方配置也<strong>无效</strong>（统一使用"神族九帝"公众号）。
+                </p>
+              </div>
+              <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p class="text-sm text-green-800">
+                  <strong>✅ 推荐：</strong>所有参数都<strong>无需手动配置</strong>，只需调用 <code class="bg-green-100 px-1 rounded text-xs">WxAuth.init()</code> 即可实现零配置接入！
                 </p>
               </div>
             </div>

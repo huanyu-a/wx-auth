@@ -382,6 +382,32 @@ export const WxAuth = {
       return;
     }
 
+    // 未设置 siteId 时自动从 referrer 或当前域名获取
+    if (!config.siteId && typeof window !== "undefined") {
+      // 优先使用 document.referrer（如果有）
+      const referrer = document.referrer;
+      if (referrer) {
+        try {
+          const referrerUrl = new URL(referrer);
+          config.siteId = referrerUrl.hostname;
+        } catch {
+          // 无效的 referrer URL
+        }
+      }
+
+      // 如果 referrer 为空，使用当前域名
+      if (!config.siteId && window.location.hostname) {
+        config.siteId = window.location.hostname;
+      }
+
+      // 如果还是获取不到（如 localhost），使用默认值
+      if (!config.siteId) {
+        config.siteId = "default";
+      }
+
+      console.log("[WxAuth] 自动获取 siteId:", config.siteId);
+    }
+
     console.log("[WxAuth] SDK initialized", config);
 
     // 自动检测 Cookie 并静默认证
