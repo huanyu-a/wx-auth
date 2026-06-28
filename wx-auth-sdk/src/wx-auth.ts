@@ -16,7 +16,7 @@
  *
  * 2. 初始化
  *    WxAuth.init({
- *      apiBase: 'https://your-api.com',
+ *      apiBase: 'https://auth.shenzjd.com',
  *      onVerified: (user) => { console.log('验证通过', user); }
  *    });
  *
@@ -47,7 +47,7 @@ interface WxAuthState {
 
 // 默认配置
 const DEFAULT_CONFIG: WxAuthConfig = {
-  apiBase: "", // 后端API地址（必填）
+  apiBase: "https://auth.shenzjd.com", // 后端API地址（默认值）
   siteId: "", // 站点标识（可选，用于区分来源网站）
   onVerified: null, // 验证成功回调
   onError: null, // 错误回调
@@ -68,7 +68,7 @@ let state: WxAuthState = {
 
 const utils = {
   // 从 apiBase 自动推导根域名（用于跨子域名共享 Cookie）
-  // wx-auth.shenzjd.com → .shenzjd.com
+  // auth.shenzjd.com → .shenzjd.com
   // parse.shenzjd.com   → .shenzjd.com
   // localhost / 127.0.0.1 / IP → 不设置 domain
   getRootDomain(): string {

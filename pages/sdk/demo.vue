@@ -50,7 +50,7 @@ npm install wx-auth-sdk</code></pre>
 <span class="text-purple-400">import</span> <span class="text-yellow-300">'wx-auth-sdk/dist/style.css'</span>;
 
 WxAuth.<span class="text-blue-400">init</span>({
-  apiBase: <span class="text-yellow-300">'https://wx-auth.shenzjd.com'</span>,
+  apiBase: <span class="text-yellow-300">'https://auth.shenzjd.com'</span>,
   siteId: <span class="text-yellow-300">'my-website'</span>, <span class="text-slate-500">// 你的网站标识</span>
   <span class="text-slate-500">// wechatName 和 qrcodeUrl 会自动从后端获取</span>
   onVerified: <span class="text-blue-400">(</span>user<span class="text-blue-400">)</span> <span class="text-purple-400">=></span> {
@@ -76,7 +76,7 @@ WxAuth.<span class="text-blue-400">init</span>({
 
 <span class="text-red-400">&lt;script&gt;</span>
   WxAuth.<span class="text-blue-400">init</span>({
-    apiBase: <span class="text-yellow-300">'https://wx-auth.shenzjd.com'</span>,
+    apiBase: <span class="text-yellow-300">'https://auth.shenzjd.com'</span>,
     siteId: <span class="text-yellow-300">'my-website'</span>,
     onVerified: <span class="text-blue-400">(</span>user<span class="text-blue-400">)</span> <span class="text-purple-400">=></span> {
       console.log(<span class="text-yellow-300">'认证成功'</span>, user);
@@ -97,7 +97,7 @@ WxAuth.<span class="text-blue-400">init</span>({
             <div class="space-y-3 text-sm">
               <div class="flex items-start gap-3">
                 <span class="inline-flex items-center justify-center px-2 py-0.5 bg-[#07C160]/10 text-[#07C160] rounded-md font-mono text-xs flex-shrink-0">apiBase</span>
-                <span class="text-slate-600">后端 API 地址（必填），当前为 <code class="bg-slate-200 px-1 rounded text-xs">wx-auth.shenzjd.com</code></span>
+                <span class="text-slate-600">后端 API 地址（必填），当前为 <code class="bg-slate-200 px-1 rounded text-xs">auth.shenzjd.com</code></span>
               </div>
               <div class="flex items-start gap-3">
                 <span class="inline-flex items-center justify-center px-2 py-0.5 bg-blue-500/10 text-blue-600 rounded-md font-mono text-xs flex-shrink-0">siteId</span>

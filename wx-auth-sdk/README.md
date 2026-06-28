@@ -24,7 +24,7 @@ import 'wx-auth-sdk/dist/style.css';
 
 // 强制认证模式（默认）
 WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',
+  apiBase: 'https://auth.shenzjd.com',
   siteId: 'my-website',  // 可选，标识你的网站
   required: true,  // 必须认证，不显示关闭按钮
   // wechatName 和 qrcodeUrl 会自动从后端获取，也可以手动指定
@@ -38,7 +38,7 @@ WxAuth.init({
 
 // 可选认证模式
 WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',
+  apiBase: 'https://auth.shenzjd.com',
   siteId: 'my-blog',
   required: false,  // 可选认证，显示关闭按钮
   onVerified: (user) => {
@@ -58,7 +58,7 @@ WxAuth.init({
 <script>
   // 强制认证模式
   WxAuth.init({
-    apiBase: 'https://wx-auth.shenzjd.com',
+    apiBase: 'https://auth.shenzjd.com',
     siteId: 'my-website',
     required: true,  // 必须认证
     onVerified: (user) => {
@@ -68,7 +68,7 @@ WxAuth.init({
 
   // 可选认证模式
   WxAuth.init({
-    apiBase: 'https://wx-auth.shenzjd.com',
+    apiBase: 'https://auth.shenzjd.com',
     siteId: 'my-blog',
     required: false,  // 可选认证
     onVerified: (user) => {
@@ -192,7 +192,7 @@ import { WxAuth } from 'wx-auth-sdk';
 
 // 强制认证模式（默认）
 WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',
+  apiBase: 'https://auth.shenzjd.com',
   siteId: 'my-blog',  // 标识你的网站
   required: true,  // 必须认证，不显示关闭按钮
   onVerified: (user) => {
@@ -203,7 +203,7 @@ WxAuth.init({
 
 // 可选认证模式
 WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',
+  apiBase: 'https://auth.shenzjd.com',
   siteId: 'my-blog',
   required: false,  // 可选认证，显示关闭按钮
   onVerified: (user) => {
@@ -234,7 +234,7 @@ loginButton.onclick = async () => {
 
 ```typescript
 WxAuth.init({
-  apiBase: 'https://wx-auth.shenzjd.com',
+  apiBase: 'https://auth.shenzjd.com',
   required: false,  // 必须设置为 false 才能关闭
   onVerified: (user) => {
     // 认证成功，允许访问内容
