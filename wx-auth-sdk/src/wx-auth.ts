@@ -53,7 +53,7 @@ const DEFAULT_CONFIG: WxAuthConfig = {
   onError: null, // 错误回调
   onClose: null, // 关闭弹窗回调（仅在 required=false 时触发）
   required: true, // 是否必须认证（默认强制认证）
-  wechatName: "公众号", // 公众号名称（可选，会自动获取）
+  wechatName: "神族九帝", // 公众号名称（可选，会自动获取）
   qrcodeUrl: "", // 二维码URL（可选，会自动获取）
 };
 
@@ -179,7 +179,7 @@ const UI = {
         <div class="wx-auth-body">
           <!-- 二维码区域 -->
           <div>
-            <div class="wx-auth-desc">1. 微信关注公众号</div>
+            <div class="wx-auth-desc">1. 微信关注公众号 <span class="wx-auth-wechat-name"></span></div>
             <div class="wx-auth-qrcode-container">
               <img class="wx-auth-qrcode" src="" alt="扫码关注" />
             </div>
@@ -291,9 +291,9 @@ const UI = {
         if (config.qrcodeUrl) {
           this.setQrCode(config.qrcodeUrl);
         }
-        const desc = document.querySelector<HTMLElement>(".wx-auth-desc");
-        if (desc && config.wechatName) {
-          desc.textContent = `1. 微信关注公众号 "${config.wechatName}"`;
+        const wechatNameEl = document.querySelector<HTMLElement>(".wx-auth-wechat-name");
+        if (wechatNameEl && config.wechatName) {
+          wechatNameEl.textContent = `"${config.wechatName}"`;
         }
         this.bindInputEvents();
         setTimeout(() => {
@@ -450,9 +450,9 @@ export const WxAuth = {
     }
 
     // 更新描述文字
-    const desc = document.querySelector<HTMLElement>(".wx-auth-desc");
-    if (desc && config.wechatName) {
-      desc.textContent = `1. 微信关注公众号 "${config.wechatName}"`;
+    const wechatNameEl = document.querySelector<HTMLElement>(".wx-auth-wechat-name");
+    if (wechatNameEl && config.wechatName) {
+      wechatNameEl.textContent = `"${config.wechatName}"`;
     }
 
     // 自动聚焦到第一个输入框
