@@ -125,7 +125,7 @@ SDK 支持两种认证模式，根据你的业务场景选择：
 
 ```typescript
 WxAuth.init({
-  apiBase: 'https://auth.shenzjd.com',
+  apiBase: 'https://wx-auth.shenzjd.com',
   siteId: 'paid-content',
   required: true,  // 强制认证（默认值）
   onVerified: (user) => {
@@ -146,7 +146,7 @@ WxAuth.init({
 
 ```typescript
 WxAuth.init({
-  apiBase: 'https://auth.shenzjd.com',
+  apiBase: 'https://wx-auth.shenzjd.com',
   siteId: 'my-blog',
   required: false,  // 可选认证
   onVerified: (user) => {
@@ -177,7 +177,7 @@ import { WxAuth } from 'wx-auth-sdk';
 import 'wx-auth-sdk/dist/style.css';
 
 WxAuth.init({
-  apiBase: 'https://auth.shenzjd.com',  // 认证服务地址
+  apiBase: 'https://wx-auth.shenzjd.com',  // 认证服务地址
   siteId: 'my-blog',                         // 你的网站标识
   required: false,                           // 可选认证，显示关闭按钮
   // wechatName 和 qrcodeUrl 自动从后端获取
@@ -197,7 +197,7 @@ WxAuth.init({
 <script src="https://unpkg.com/wx-auth-sdk/dist/wx-auth.umd.js"></script>
 <script>
   WxAuth.init({
-    apiBase: 'https://auth.shenzjd.com',
+    apiBase: 'https://wx-auth.shenzjd.com',
     siteId: 'my-blog',
     required: false,  // 可选认证
     onVerified: (user) => {
@@ -296,7 +296,7 @@ wx-auth/
 ### Docker .env 示例
 
 ```env
-NUXT_PUBLIC_SITE_URL=https://auth.shenzjd.com
+NUXT_PUBLIC_SITE_URL=https://wx-auth.shenzjd.com
 NUXT_WECHAT_TOKEN=your-wechat-token
 NUXT_SESSION_SECRET=your-random-secret
 WECHAT_NAME=你的公众号名称

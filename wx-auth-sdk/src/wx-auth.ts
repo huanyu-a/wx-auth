@@ -16,7 +16,7 @@
  *
  * 2. 初始化
  *    WxAuth.init({
- *      apiBase: 'https://auth.shenzjd.com',
+ *      apiBase: 'https://wx-auth.shenzjd.com',
  *      onVerified: (user) => { console.log('验证通过', user); }
  *    });
  *
@@ -47,7 +47,7 @@ interface WxAuthState {
 
 // 默认配置
 const DEFAULT_CONFIG: WxAuthConfig = {
-  apiBase: "https://auth.shenzjd.com", // 后端API地址（默认值）
+  apiBase: "https://wx-auth.shenzjd.com", // 后端API地址（默认值）
   siteId: "", // 站点标识（可选，用于区分来源网站）
   onVerified: null, // 验证成功回调
   onError: null, // 错误回调

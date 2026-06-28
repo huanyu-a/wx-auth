@@ -50,7 +50,7 @@ npm install wx-auth-sdk</code></pre>
 <span class="text-purple-400">import</span> <span class="text-yellow-300">'wx-auth-sdk/dist/style.css'</span>;
 
 WxAuth.<span class="text-blue-400">init</span>({
-  apiBase: <span class="text-yellow-300">'https://auth.shenzjd.com'</span>,
+  apiBase: <span class="text-yellow-300">'https://wx-auth.shenzjd.com'</span>,
   siteId: <span class="text-yellow-300">'my-website'</span>, <span class="text-slate-500">// 你的网站标识</span>
   <span class="text-slate-500">// wechatName 和 qrcodeUrl 会自动从后端获取</span>
   onVerified: <span class="text-blue-400">(</span>user<span class="text-blue-400">)</span> <span class="text-purple-400">=></span> {
@@ -76,7 +76,7 @@ WxAuth.<span class="text-blue-400">init</span>({
 
 <span class="text-red-400">&lt;script&gt;</span>
   WxAuth.<span class="text-blue-400">init</span>({
-    apiBase: <span class="text-yellow-300">'https://auth.shenzjd.com'</span>,
+    apiBase: <span class="text-yellow-300">'https://wx-auth.shenzjd.com'</span>,
     siteId: <span class="text-yellow-300">'my-website'</span>,
     onVerified: <span class="text-blue-400">(</span>user<span class="text-blue-400">)</span> <span class="text-purple-400">=></span> {
       console.log(<span class="text-yellow-300">'认证成功'</span>, user);
