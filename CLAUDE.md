@@ -12,29 +12,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **SDK**: 原生 JavaScript + Vite 构建（< 12KB，零依赖）
 - **存储**: JSON 文件 / SQLite 双支持
 
-## 目录结构
+## 快速导航
 
-```
-wx-auth/
-├── server/                    # 后端 API
-│   ├── api/wechat/message.ts  # 微信消息处理（接收/回复）
-│   ├── api/auth/check.ts      # 认证状态检查
-│   ├── api/auth/session.ts    # Session 管理
-│   └── utils/                 # 工具函数（微信加解密、存储、Session）
-├── pages/                     # 前端页面
-│   └── index.vue              # 认证演示页面
-├── wx-auth-sdk/               # 独立 SDK 模块
-│   ├── src/
-│   │   ├── index.ts           # SDK 入口
-│   │   ├── wx-auth.ts         # SDK 核心逻辑
-│   │   └── wx-auth.css        # SDK 样式
-│   └── vite.config.ts         # SDK 构建配置
-├── data/                      # 数据存储目录
-│   └── auth-data.json         # JSON 存储文件
-├── nuxt.config.ts             # Nuxt 配置
-├── package.json               # 项目依赖
-└── .env.example               # 环境变量模板
-```
+- **后端 API**: `server/api/` - Nitro Server API endpoints
+- **工具函数**: `server/utils/` - 微信加解密、存储、Session 管理
+- **SDK 源码**: `wx-auth-sdk/src/` - 前端 SDK 核心逻辑
+- **前端页面**: `pages/` - Nuxt 页面路由
+- **数据目录**: `data/` - JSON 存储文件（需手动创建）
 
 ## 开发命令
 
@@ -51,23 +35,35 @@ npm run generate     # 生成静态站点
 ```bash
 cd wx-auth-sdk
 npm install          # 安装依赖
+npm run dev          # SDK 开发模式
 npm run build        # 构建 SDK（输出到 dist/）
 npm run type-check   # TypeScript 类型检查
 ```
 
+### Docker 部署
+```bash
+# 本地构建测试
+docker build -t wx-auth .
+docker run -d --name wx-auth --env-file .env -p 3000:3000 -v ./data:/app/data wx-auth
+
+# 查看日志
+docker logs -f wx-auth
+
+# 停止容器
+docker stop wx-auth && docker rm wx-auth
+```
+
 ## 核心架构
 
-### 前端（pages/index.vue）
-- 集成 SDK，自动初始化
-- 提供重新认证和清空状态按钮
-- 自动检测 Cookie 并静默认证
-- 认证成功后不显示提示（静默通过）
-
 ### 后端 API 端点
-1. **`/api/wechat/message`** - 微信消息处理（GET/POST）
+1. **`/api/wechat/message`** - 微信消息处理（GET/POST）- 接收微信服务器推送
 2. **`/api/auth/check`** - 认证检查（参数：`authToken` 或 `openid`，可选 `siteId`）
 3. **`/api/auth/session`** - Session 管理（POST/GET/DELETE）
 4. **`/api/sdk/config`** - SDK 配置下发（返回 wechatName、qrcodeUrl）
+
+### 前端页面
+- **`pages/index.vue`** - 认证演示页面（集成 SDK）
+- **`pages/sdk/demo.vue`** - SDK 接入文档
 
 ### SDK 工作流程
 1. 检查 Cookie `wxauth-openid`
@@ -76,6 +72,14 @@ npm run type-check   # TypeScript 类型检查
 4. 用户扫码 + 输入验证码
 5. 验证成功 → 保存 Cookie + 回调
 6. 用户关闭弹窗 → 触发 `onClose` 回调
+
+### 工具层（server/utils/）
+- **`wechat.ts`** - 微信 API 交互（签名验证、消息解析、加密解密）
+- **`storage.ts`** - 存储层抽象（支持 JSON 文件和 SQLite，按 siteId 隔离）
+- **`session.ts`** - Session 生成与验证（AES-256-GCM 加密）
+- **`token.ts`** - Token 生成与管理
+- **`db.ts`** - 数据库连接（SQLite 支持）
+- **`rate-limit.ts`** - 速率限制（防止暴力破解）
 
 ## 关键配置
 
@@ -128,6 +132,27 @@ WxAuth.init({
 - **true（默认）** - 强制认证，不显示关闭按钮，点击遮罩无效
 - **false** - 可选认证，显示关闭按钮，点击遮罩可关闭，支持 `onClose` 回调
 
+## CI/CD 工作流
+
+### 自动部署（push 到 main）
+- **触发条件**: 推送代码到 `main` 分支
+- **工作流**: `.github/workflows/docker.yml`
+- **流程**:
+  1. 构建 Docker 镜像
+  2. 推送到 GitHub Container Registry (ghcr.io)
+  3. SSH 部署到生产服务器（端口 `6702`）
+  4. 数据持久化: `/opt/1panel/apps/openresty/openresty/www/sites/wx-auth.shenzjd.com/index/data`
+
+### SDK 自动发布（修改 wx-auth-sdk 后 push 到 main）
+- **触发条件**: 修改 `wx-auth-sdk/` 目录后推送
+- **工作流**: `.github/workflows/publish-sdk.yml`
+- **流程**:
+  1. 自动获取 NPM 最新版本并 +1
+  2. 更新 `wx-auth-sdk/package.json` 版本号
+  3. 构建 SDK 并验证产物
+  4. 发布到 NPM（`wx-auth-sdk`）
+  5. 提交版本号更新到 main
+  6. 创建 GitHub Release（`sdk-v{x.y.z}`）
 
 ## 核心特性
 
@@ -136,6 +161,7 @@ WxAuth.init({
 - 验证码 5 分钟过期，一次性使用
 - 微信消息签名验证
 - 支持安全模式（加密消息）
+- Cookie: HttpOnly + SameSite=none + Secure
 
 ### 用户体验
 - 自动聚焦第一个输入框
@@ -197,3 +223,86 @@ WxAuth.init({
 4. **SDK 导入**：开发时从 `../wx-auth-sdk/src/index` 导入，生产时从 NPM 包导入
 5. **公众号配置**：接入方无需配置 `wechatName` 和 `qrcodeUrl`，配置也无效（统一使用后端配置的"神族九帝"公众号）
 6. **siteId 自动获取**：SDK 会自动从 `document.referrer` 或当前域名获取 `siteId`，无需手动配置
+7. **Docker 环境变量前缀**：私有配置需加 `NUXT_` 前缀（如 `NUXT_WECHAT_TOKEN`），公开配置加 `NUXT_PUBLIC_` 前缀（如 `NUXT_PUBLIC_SITE_URL`）
+
+## 调试技巧
+
+### 查看后端日志
+```bash
+# Docker 环境
+docker logs -f wx-auth
+
+# 开发环境
+# 日志直接输出到终端
+```
+
+### 测试微信消息接收
+```bash
+# 微信后台配置服务器 URL
+# https://wx-auth.shenzjd.com/api/wechat/message
+```
+
+### 验证认证状态
+```bash
+# 检查 Cookie
+curl -I https://wx-auth.shenzjd.com
+
+# 手动调用认证检查接口
+curl "https://wx-auth.shenzjd.com/api/auth/check?openid=test-openid"
+```
+
+### SDK 开发调试
+```bash
+# 在 demo 页面测试
+# http://localhost:3000/sdk/demo
+
+# 清空 Cookie 重新测试
+document.cookie = 'wxauth-openid=; path=/; max-age=0'
+location.reload()
+```
+
+## Git 工作流
+
+- **主分支**: `main` - 生产环境代码
+- **发布流程**: push 到 main 自动触发 Docker 构建 + 部署
+- **SDK 发布**: 修改 `wx-auth-sdk/` 后 push 自动发布 NPM 包
+- **Commit 规范**: 建议使用 `feat:` / `fix:` / `chore:` / `refactor:` 等 conventional commits
+
+## 常见问题
+
+### 1. Cookie 不生效？
+- 检查 `siteUrl` 配置是否与当前域名一致
+- 确认 Cookie 域名设置（生产环境需配置为父级域名）
+
+### 2. 验证码不生效？
+- 检查验证码是否过期（默认 5 分钟）
+- 确认验证码已从消息队列删除（一次性使用）
+- 检查 `code` 存储中是否包含正确的 `siteId`
+
+### 3. 微信消息收不到？
+- 确认 `WECHAT_TOKEN` 配置正确
+- 检查微信后台服务器配置 URL 是否正确
+- 查看后端日志是否有签名验证失败
+- 确认防火墙允许微信服务器 IP 访问
+
+### 4. Docker 环境变量不生效？
+- Docker 部署必须加 `NUXT_` 前缀
+- 本地开发直接用原始名称（`WECHAT_TOKEN` 而非 `NUXT_WECHAT_TOKEN`）
+- 检查 `.env` 文件是否在正确的目录
+
+### 5. SDK 配置不生效？
+- `wechatName` 和 `qrcodeUrl` 由后端 `/api/sdk/config` 自动下发
+- 接入方在 SDK 中配置这两个参数无效
+- 确认后端 `NUXT_WECHAT_NAME` 和 `NUXT_WECHAT_QRCODE_URL` 已配置
+
+## 相关资源
+
+- **NPM 包**: https://www.npmjs.com/package/wx-auth-sdk
+- **GitHub 仓库**: https://github.com/wu529778790/wx-auth
+- **生产地址**: https://wx-auth.shenzjd.com
+- **SDK 文档**: `wx-auth-sdk/README.md`
+
+---
+
+**版本**: v1.2.5
+**状态**: ✅ 生产就绪
