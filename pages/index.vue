@@ -201,7 +201,7 @@ const WECHAT_NAME = "神族九帝";
 
 // 公众号二维码 URL（可选，自动从后端获取）
 const WECHAT_QRCODE_URL =
-  "https://gcore.jsdelivr.net/gh/wu529778790/image/blog/qrcode_for_gh_61da24be23ff_258.jpg";
+  "https://cdn.jsdmirror.com/gh/wu529778790/img.shenzjd.com@master/wp/1782738963299-5wrchz.jpg";
 // ============================================================
 
 const hasAuthCookie = ref(false);
