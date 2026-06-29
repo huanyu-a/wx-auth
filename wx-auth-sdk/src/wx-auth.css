@@ -304,12 +304,3 @@
   cursor: pointer;
 }
 
-/* 可选认证模式提示文字 */
-.wx-auth-optional .wx-auth-desc::after {
-  content: '（可点击右上角关闭）';
-  display: block;
-  font-size: 12px;
-  color: #999;
-  margin-top: 4px;
-  font-weight: normal;
-}
