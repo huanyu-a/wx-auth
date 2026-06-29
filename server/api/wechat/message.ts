@@ -134,7 +134,7 @@ export default eventHandler(async (event) => {
         console.log(`[WeChat] 用户 ${FromUserName} 关注公众号，发送验证码 ${code}`);
 
         const welcomeMsg = generateWelcomeMessage(FromUserName);
-        const codeMsg = `\n\n您的认证码：${code}\n\n请在网站输入此验证码完成认证。`;
+        const codeMsg = `\n\n━━━━━━━━━━━━━━━━━━\n✅ 您的验证码：${code}\n━━━━━━━━━━━━━━━━━━\n\n👉 在网站输入验证码完成认证\n\n💡 验证码5分钟内有效`;
 
         replyMsg = welcomeMsg + codeMsg;
 

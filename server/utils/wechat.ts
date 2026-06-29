@@ -230,48 +230,25 @@ export function containsAuthKeyword(content: string): boolean {
   return keywords.some(k => content.includes(k));
 }
 /**
- * 生成欢迎消息（包含验证码和网站推广）- 通用版本
+ * 生成欢迎消息（不含验证码，只做欢迎语和网站推广）
  */
 export function generateWelcomeMessage(openid: string): string {
   const siteUrl = useRuntimeConfig().public.siteUrl;
 
   return `🎉 欢迎关注神族九帝！
 
-━━━━━━━━━━━━━━━━━━
-✅ 您的验证码：<SECRET_bfa776fe>━━━━━━━━━━━━━━━━━━
-
-👉 在网站输入验证码完成认证
-
-💡 验证码5分钟内有效
-如需新验证码，发送"验证码"即可
-
-━━━━━━━━━━━━━━━━━━
-🌐 我的导航站
-━━━━━━━━━━━━━━━━━━
-
-🏠 首页：
-   https://shenzjd.com
-
-🔗 常用工具：
-   📍 在线网盘：https://alist.shenzjd.com
-   📍 网盘搜索：https://panhub.shenzjd.com
-   📍 快链工具：https://duanlian.shenzjd.com
-   📍 视频解析：https://parse.shenzjd.com
-   📍 热点聚合：https://newshub.shenzjd.com
-   📍 个人导航：https://navhub.shenzjd.com
-   📍 必应壁纸：https://bing.shenzjd.com
-
-━━━━━━━━━━━━━━━━━━
-🌍 社交媒体
-━━━━━━━━━━━━━━━━━━
-
-💬 Telegram：https://t.me/shenzjd_com
-💻 GitHub：https://github.com/wu529778790
-🐦 X(Twitter)：https://x.com/shenzujiudi`;
+🔗 我的首页：https://shenzjd.com
+📍 在线网盘：https://alist.shenzjd.com
+📍 网盘搜索：https://panhub.shenzjd.com
+📍 快链工具：https://duanlian.shenzjd.com
+📍 视频解析：https://parse.shenzjd.com
+📍 热点聚合：https://newshub.shenzjd.com
+📍 个人导航：https://navhub.shenzjd.com
+📍 必应壁纸：https://bing.shenzjd.com`;
 }
 
 /**
- * 生成认证码回复消息 - 通用版本
+ * 生成验证码回复消息 - 请求验证码时使用
  */
 export function generateCodeMessage(code: string): string {
   return `✅ 验证码已生成
@@ -282,5 +259,5 @@ export function generateCodeMessage(code: string): string {
 
 👉 在网站输入验证码完成认证
 
-💡 提示：验证码5分钟内有效`;
+💡 验证码5分钟内有效`;
 }
