@@ -32,7 +32,15 @@
       "Bash(git commit -m 'docs: 更新 SDK 演示页面的配置说明 *)",
       "Bash(git commit -m 'feat: SDK 支持零配置接入，siteId 自动从 referrer/域名获取 *)",
       "Bash(pnpm build *)",
-      "Bash(pnpm approve-builds *)"
+      "Bash(pnpm approve-builds *)",
+      "Bash(npm view *)",
+      "Bash(npm version *)",
+      "Bash(git checkout *)",
+      "Bash(git reset *)",
+      "Bash(git clean *)",
+      "WebSearch",
+      "Bash(python3 *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
