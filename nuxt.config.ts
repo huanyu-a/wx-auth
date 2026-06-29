@@ -78,5 +78,14 @@ export default defineNuxtConfig({
         types: ['@types/node']
       }
     }
+  },
+
+  // Vite 配置
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@heroicons/vue/24/outline'
+      ]
+    }
   }
 });
