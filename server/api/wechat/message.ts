@@ -138,6 +138,17 @@ export default eventHandler(async (event) => {
 
         replyMsg = welcomeMsg + codeMsg;
 
+      } else if (MsgType === 'event' && Event === 'unsubscribe') {
+        // 取消关注事件 - 记录日志，不回复
+        console.log(`[WeChat] 用户 ${FromUserName} 取消关注公众号`);
+        return 'success';
+
+      } else if (MsgType === 'event' && Event === 'LOCATION') {
+        // 位置事件 - 记录日志，不回复（或可以根据需要回复）
+        console.log(`[WeChat] 用户 ${FromUserName} 上报位置信息`);
+        // 可以根据业务需求决定是否回复，这里选择不回复
+        return 'success';
+
       } else if (MsgType === 'text') {
         const content = String(Content || '').trim();
 
@@ -158,6 +169,12 @@ export default eventHandler(async (event) => {
           console.log(`[WeChat] 用户 ${FromUserName} 发送非关键词: "${content}"`);
           replyMsg = '欢迎！如果您需要重新获取验证码，请发送"验证码"。';
         }
+      }
+
+      // 如果没有回复内容，直接返回成功（不发送空回复）
+      if (!replyMsg) {
+        console.log(`[WeChat] 无需回复，直接返回 success`);
+        return 'success';
       }
 
       // 构建回复消息

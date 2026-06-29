@@ -6,10 +6,14 @@ export interface WeChatMessage {
   ToUserName: string;
   FromUserName: string;
   CreateTime: number;
-  MsgType: 'text' | 'event' | 'news';
+  MsgType: 'text' | 'event' | 'news' | 'image';
   Content?: string;
   Event?: string;
   MsgId?: number;
+  Image?: {
+    PicUrl?: string;
+    MediaId?: string;
+  };
 }
 
 /**
@@ -201,6 +205,8 @@ export function generateWeChatReply(message: WeChatMessage): string {
 
   if (message.MsgType === 'text' && message.Content) {
     xml += `<Content>${cdata(message.Content)}</Content>`;
+  } else if (message.MsgType === 'image' && message.Image?.PicUrl) {
+    xml += `<Image><PicUrl>${cdata(message.Image.PicUrl)}</PicUrl></Image>`;
   }
 
   xml += '</xml>';
@@ -223,32 +229,58 @@ export function containsAuthKeyword(content: string): boolean {
   const keywords = config.keywords;
   return keywords.some(k => content.includes(k));
 }
-
 /**
- * 生成欢迎消息
+ * 生成欢迎消息（包含验证码和网站推广）- 通用版本
  */
 export function generateWelcomeMessage(openid: string): string {
   const siteUrl = useRuntimeConfig().public.siteUrl;
-  return `欢迎关注！🎉
 
-请访问网站完成认证：
-${siteUrl}
+  return `🎉 欢迎关注神族九帝！
 
-在网站输入您的认证码，或发送"已关注"到本公众号获取认证码。
+━━━━━━━━━━━━━━━━━━
+✅ 您的验证码：<SECRET_bfa776fe>━━━━━━━━━━━━━━━━━━
 
-提示：认证码5分钟内有效。`;
+👉 在网站输入验证码完成认证
+
+💡 验证码5分钟内有效
+如需新验证码，发送"验证码"即可
+
+━━━━━━━━━━━━━━━━━━
+🌐 我的导航站
+━━━━━━━━━━━━━━━━━━
+
+🏠 首页：
+   https://shenzjd.com
+
+🔗 常用工具：
+   📍 在线网盘：https://alist.shenzjd.com
+   📍 网盘搜索：https://panhub.shenzjd.com
+   📍 快链工具：https://duanlian.shenzjd.com
+   📍 视频解析：https://parse.shenzjd.com
+   📍 热点聚合：https://newshub.shenzjd.com
+   📍 个人导航：https://navhub.shenzjd.com
+   📍 必应壁纸：https://bing.shenzjd.com
+
+━━━━━━━━━━━━━━━━━━
+🌍 社交媒体
+━━━━━━━━━━━━━━━━━━
+
+💬 Telegram：https://t.me/shenzjd_com
+💻 GitHub：https://github.com/wu529778790
+🐦 X(Twitter)：https://x.com/shenzujiudi`;
 }
 
 /**
- * 生成认证码回复消息
+ * 生成认证码回复消息 - 通用版本
  */
 export function generateCodeMessage(code: string): string {
-  return `✅ 认证码已生成
+  return `✅ 验证码已生成
 
-您的认证码：${code}
+━━━━━━━━━━━━━━━━━━
+您的验证码：${code}
+━━━━━━━━━━━━━━━━━━
 
-请在网站输入此认证码完成登录，或直接刷新网站页面。
+👉 在网站输入验证码完成认证
 
-提示：认证码5分钟内有效。`;
+💡 提示：验证码5分钟内有效`;
 }
-
