@@ -100,7 +100,7 @@ const utils = {
   // 设置Cookie（30天过期，自动设置根域名实现跨子域共享）
   setCookie(name: string, value: string): void {
     const date = new Date();
-    date.setTime(date.getTime() + 30 * 24 * 60 * 60 * 1000);
+    date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000);
     const domain = this.getRootDomain();
     const domainStr = domain ? `;domain=${domain}` : '';
     const isSecure = window.location.protocol === 'https:';

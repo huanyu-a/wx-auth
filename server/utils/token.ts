@@ -30,7 +30,7 @@ export function signOpenid(openid: string, secret: string): string {
 export function verifySignedToken(
   token: string,
   secret: string,
-  maxAgeSeconds: number = 30 * 24 * 60 * 60 // 默认 30 天
+  maxAgeSeconds: number = 365 * 24 * 60 * 60 // 默认 1 年
 ): string | null {
   const parts = token.split('.');
   if (parts.length !== 3) return null;

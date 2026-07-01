@@ -19,7 +19,8 @@ import {
   saveAuthCode,
   getUserByAuthCode,
   deleteAuthCode,
-  markUserAuthenticated
+  markUserAuthenticated,
+  clearUserAuthentication
 } from '../../utils/storage';
 
 export default eventHandler(async (event) => {
@@ -139,8 +140,9 @@ export default eventHandler(async (event) => {
         replyMsg = welcomeMsg + codeMsg;
 
       } else if (MsgType === 'event' && Event === 'unsubscribe') {
-        // 取消关注事件 - 记录日志，不回复
-        console.log(`[WeChat] 用户 ${FromUserName} 取消关注公众号`);
+        // 取消关注事件 - 清除用户认证状态
+        clearUserAuthentication(FromUserName);
+        console.log(`[WeChat] 用户 ${FromUserName} 取消关注公众号，已清除认证状态`);
         return 'success';
 
       } else if (MsgType === 'event' && Event === 'LOCATION') {
