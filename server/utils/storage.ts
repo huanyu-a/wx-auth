@@ -93,7 +93,6 @@ function saveData(data: StorageData, force = false) {
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
     memoryCache = data;
     lastWriteTime = now;
-    console.log('[Storage] 数据已保存到文件');
   } catch (error) {
     console.error('[Storage] Failed to save data:', error);
   }

@@ -4,13 +4,6 @@
 import { eventHandler, getQuery } from 'h3';
 
 export default eventHandler(async (event) => {
-  const { siteId } = getQuery(event);
-
-  // 记录 siteId 请求日志（用于统计来源网站）
-  if (siteId) {
-    console.log(`[SDK Config] siteId: ${siteId}, referer: ${event.node.req?.headers?.referer || 'unknown'}`);
-  }
-
   const config = useRuntimeConfig();
 
   return {
