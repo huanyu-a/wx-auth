@@ -190,6 +190,7 @@ const UI = {
           <!-- 验证码输入区域 -->
           <div>
             <div class="wx-auth-hint">2. 向公众号发送"验证码"获取</div>
+            <div class="wx-auth-note">取消关注公众号后将被取消认证，请保持关注</div>
             ${utils.generateCodeInputs()}
           </div>
 
@@ -646,6 +647,7 @@ export const WxAuth = {
 };
 
 // 浏览器全局暴露（用于 script 标签引入）
+// freeze 防止 F12 上做 WxAuth.requireAuth = () => Promise.resolve(true) 之类的篡改
 if (typeof window !== "undefined") {
-  (window as any).WxAuth = WxAuth;
+  (window as any).WxAuth = Object.freeze(WxAuth);
 }

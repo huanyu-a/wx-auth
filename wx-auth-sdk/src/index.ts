@@ -5,7 +5,7 @@
  *
  * 1. 引入SDK和样式
  *    import { WxAuth } from '@your-npm-package/wx-auth-sdk';
- *    import '@your-npm-package/wx-auth-sdk/dist/style.css';
+ *    import 'wx-auth-sdk/dist/wx-auth.css';
  *
  * 2. 初始化
  *    WxAuth.init({

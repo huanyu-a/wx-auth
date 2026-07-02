@@ -47,7 +47,7 @@ npm install wx-auth-sdk</code></pre>
               </div>
               <div class="bg-slate-900 rounded-xl p-4 overflow-x-auto">
                 <pre class="text-sm text-slate-300 font-mono leading-relaxed"><code><span class="text-purple-400">import</span> { WxAuth } <span class="text-purple-400">from</span> <span class="text-yellow-300">'wx-auth-sdk'</span>;
-<span class="text-purple-400">import</span> <span class="text-yellow-300">'wx-auth-sdk/dist/style.css'</span>;
+<span class="text-purple-400">import</span> <span class="text-yellow-300">'wx-auth-sdk/dist/wx-auth.css'</span>;
 
 <span class="text-green-400">// ✅ 零配置接入（推荐）</span>
 WxAuth.<span class="text-blue-400">init</span>({
