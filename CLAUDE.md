@@ -112,12 +112,21 @@ WxAuth.init({
   siteId: 'my-website',                // ← 可选：站点唯一标识（不填则自动获取）
   apiBase: 'https://wx-auth.shenzjd.com',  // 后端 API 地址（可选，有默认值）
   required: false,                     // 是否必须认证（默认 true）
+  silent: false,                       // ← 可选：true 时 init 不调弹窗，弹窗由 requireAuth() 手动触发
   // wechatName 和 qrcodeUrl 无需配置，自动从后端获取
   // 接入方配置自己的公众号名称和二维码无效（统一使用"神族九帝"）
   onVerified: (user) => { ... },       // 验证成功回调
   onError: (error) => { ... },        // 错误回调
   onClose: () => { ... }               // 关闭弹窗回调（仅 required=false 时触发）
 });
+
+// ✅ silent 模式：延迟弹窗（例：免费搜索 3 次后再要求认证）
+WxAuth.init({
+  silent: true,
+  required: false,
+  onVerified: (user) => { /* 标注已认证 */ },
+});
+// 业务代码里：freeSearches 用完后 await WxAuth.requireAuth() 手动触发弹窗
 ```
 
 **核心概念：**

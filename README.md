@@ -94,6 +94,19 @@ WxAuth.init({
 
 零配置 — `siteId`、公众号名称、二维码全部自动获取。
 
+#### 延迟弹窗 (`silent` 模式)
+
+```typescript
+WxAuth.init({
+  silent: true,       // init 不调弹窗，只静默校验 cookie
+  required: false,
+  onVerified: (user) => { /* 标注已认证 */ },
+});
+
+// 后续由业务代码自行控制弹窗时机
+// 例：await WxAuth.requireAuth();
+```
+
 ### Docker 部署
 
 ```bash

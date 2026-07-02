@@ -36,6 +36,7 @@ interface WxAuthConfig {
   required?: boolean; // 是否必须认证（true=强制认证，false=可选认证）
   wechatName?: string;
   qrcodeUrl?: string;
+  silent?: boolean; // 静默初始化：true 时 init 不做弹窗，仅校验 cookie 并回调 onVerified
 }
 
 // 状态类型
@@ -55,6 +56,7 @@ const DEFAULT_CONFIG: WxAuthConfig = {
   required: true, // 是否必须认证（默认强制认证）
   wechatName: "神族九帝", // 公众号名称（可选，会自动获取）
   qrcodeUrl: "", // 二维码URL（可选，会自动获取）
+  silent: false, // 默认不静默
 };
 
 let config: WxAuthConfig = { ...DEFAULT_CONFIG };
@@ -413,9 +415,55 @@ export const WxAuth = {
 
     console.log("[WxAuth] SDK initialized", config);
 
-    // 自动检测 Cookie 并静默认证
+    // silent → 只校验 cookie，弹窗由消费者自己控制
+    // 非 silent → 保持现有行为（需要弹窗时自动弹）
     if (typeof window !== "undefined") {
-      this.autoCheck();
+      if (config.silent) {
+        this.silentCheck();
+      } else {
+        this.autoCheck();
+      }
+    }
+  },
+
+  /**
+   * 静默验证（silent 模式专用）
+   * - cookie 有效 → setCookie(token) + onVerified，不调 showAuthModal
+   * - cookie 无效 / 不存在 → deleteCookie，不调 showAuthModal
+   * - 网络错误 → 静默忽略（留给消费者后续 requireAuth 重试）
+   */
+  async silentCheck(): Promise<boolean> {
+    const signedToken = utils.getCookie("wxauth-token");
+    const legacyOpenid = utils.getCookie("wxauth-openid");
+    const token = signedToken || legacyOpenid;
+
+    if (!token) return false;
+
+    const siteParam = config.siteId ? `&siteId=${encodeURIComponent(config.siteId)}` : '';
+    const tokenParam = signedToken
+      ? `token=${encodeURIComponent(signedToken)}`
+      : `openid=${encodeURIComponent(legacyOpenid || '')}`;
+
+    try {
+      const result = await utils.request(
+        `${config.apiBase}/api/auth/check?${tokenParam}${siteParam}`
+      );
+
+      if (result.authenticated) {
+        if (result.token) {
+          utils.setCookie("wxauth-token", result.token);
+          if (legacyOpenid) utils.deleteCookie("wxauth-openid");
+        }
+        this.onVerified(result.user);
+        return true;
+      } else {
+        utils.deleteCookie("wxauth-token");
+        if (legacyOpenid) utils.deleteCookie("wxauth-openid");
+        return false;
+      }
+    } catch (error) {
+      console.error("[WxAuth] silentCheck 请求失败:", error);
+      return false;
     }
   },
 

@@ -46,6 +46,7 @@ WxAuth.init({
   siteId?: string,          // 站点标识（可选，自动获取）
   apiBase?: string,         // 后端地址（可选，默认官方服务）
   required?: boolean,       // 是否强制认证（默认 true）
+  silent?: boolean,         // 静默初始化（默认 false），true 时不弹窗
   onVerified?: (user) => void,
   onError?: (err) => void,
   onClose?: () => void,     // required=false 时关闭弹窗的回调
@@ -163,3 +164,36 @@ WxAuth.init({
 npm install
 npm run build
 ```
+
+---
+
+## `silent` 模式：延迟弹窗
+
+默认行为下，`init` 遇到未认证会自动弹窗。如果想**自己控制弹窗时机**（比如免费 3 次搜索后再弹），开启 `silent`：
+
+```ts
+// 1. 静默初始化：只校验现有 cookie，不调弹窗
+WxAuth.init({
+  silent: true,
+  required: false,
+  onVerified: (user) => { /* 标注已认证 */ },
+});
+
+// 2. 业务代码里自由控制弹窗
+//    例：免费搜索 3 次后再要求认证
+let freeSearches = 3;
+async function onSearch() {
+  if (freeSearches > 0) {
+    freeSearches--;
+    doSearch();
+  } else {
+    const ok = await WxAuth.requireAuth();  // 手动触发弹窗
+    if (ok) doSearch();
+  }
+}
+```
+
+| `silent` | `init()` 行为 | 适用场景 |
+|----------|--------------|---------|
+| `false`（默认） | 需要时自动弹窗 | 付费墙、内测白名单 |
+| `true` | 仅校验 cookie，弹窗由 `requireAuth()` 手动触发 | 免费额度、按需解锁 |
