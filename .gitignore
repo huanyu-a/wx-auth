@@ -55,3 +55,7 @@ test-*.html
 PROTECTION_TEST.md
 REFACTORING_SUMMARY.md
 
+# 本地 AI 助手工作目录（记忆/状态，不提交）
+.workbuddy/
+.codebuddy/
+
