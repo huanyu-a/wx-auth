@@ -59,8 +59,8 @@ const BLOCKED_API_PATHS = new Set([
   '/oauth/token',
   '/login',
   '/logout',
-  '/admin',
-  '/admin.html',
+  // 注意：'/admin' 和 '/admin.html' 已移除——本应用 /admin 是真实后台页面，
+  //       放在此处会被精确匹配静默成空 200，导致后台白屏。后台防护交给页面/API 自身的鉴权层。
   '/administrator/',
   '/administrator',
   '/phpmyadmin',
