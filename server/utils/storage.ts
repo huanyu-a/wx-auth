@@ -4,6 +4,8 @@
 
 import fs from 'fs';
 import path from 'path';
+import type { H3Event } from 'h3';
+import { makeLogger } from './logger';
 
 // 配置：使用哪种存储方式
 const STORAGE_TYPE = process.env.STORAGE_TYPE || 'file'; // 'file' 或 'sqlite'
@@ -126,7 +128,8 @@ function cleanupExpiredData() {
 export function saveAuthCode(
   code: string,
   openid: string,
-  userInfo?: { nickname?: string; headimgurl?: string; unionid?: string; siteId?: string }
+  userInfo?: { nickname?: string; headimgurl?: string; unionid?: string; siteId?: string },
+  event?: H3Event
 ) {
   const data = loadData();
   const expiryTime = parseInt(process.env.CODE_EXPIRY || '300') * 1000;
@@ -150,7 +153,7 @@ export function saveAuthCode(
   };
 
   saveData(data);
-  console.log(`[Storage] 保存认证码 ${code} 给用户 ${openid}`);
+  makeLogger(event).log(`[Storage] 保存认证码 ${code} 给用户 ${openid}`);
 }
 
 /**
@@ -193,7 +196,8 @@ export function deleteAuthCode(code: string) {
  */
 export function markUserAuthenticated(
   openid: string,
-  userInfo: { nickname?: string; headimgurl?: string; unionid?: string; siteId?: string }
+  userInfo: { nickname?: string; headimgurl?: string; unionid?: string; siteId?: string },
+  event?: H3Event
 ) {
   const data = loadData();
 
@@ -206,7 +210,7 @@ export function markUserAuthenticated(
   };
 
   saveData(data);
-  console.log(`[Storage] 用户 ${openid} 已认证`);
+  makeLogger(event).log(`[Storage] 用户 ${openid} 已认证`);
 }
 
 /**
@@ -228,7 +232,7 @@ export function getAuthenticatedUser(openid: string) {
 /**
  * 清除用户认证状态（登出）
  */
-export function clearUserAuthentication(openid: string) {
+export function clearUserAuthentication(openid: string, event?: H3Event) {
   const data = loadData();
 
   // 删除认证用户
@@ -245,7 +249,7 @@ export function clearUserAuthentication(openid: string) {
 
   if (userDeleted || codesDeleted > 0) {
     saveData(data);
-    console.log(`[Storage] 清除用户 ${openid} 的认证状态 (用户: ${userDeleted ? 1 : 0}, 验证码: ${codesDeleted})`);
+    makeLogger(event).log(`[Storage] 清除用户 ${openid} 的认证状态 (用户: ${userDeleted ? 1 : 0}, 验证码: ${codesDeleted})`);
   }
 }
 

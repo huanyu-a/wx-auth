@@ -22,14 +22,16 @@ import {
   markUserAuthenticated,
   clearUserAuthentication
 } from '../../utils/storage';
+import { makeLogger } from '../../utils/logger';
 
 export default eventHandler(async (event) => {
   const method = getMethod(event);
+  const log = makeLogger(event);
   const config = useRuntimeConfig().wechat;
 
   // 验证配置
   if (!config.token) {
-    console.error('[WeChat] WECHAT_TOKEN 未设置');
+    log.error('[WeChat] WECHAT_TOKEN 未设置');
     return 'Invalid configuration';
   }
 
@@ -85,7 +87,7 @@ export default eventHandler(async (event) => {
         );
 
         if (!msg_signature || msg_signature !== expectedSignature) {
-          console.error('[WeChat] 消息签名验证失败');
+          log.error('[WeChat] 消息签名验证失败');
           return 'Invalid signature';
         }
 
@@ -111,9 +113,9 @@ export default eventHandler(async (event) => {
       // 关注事件 - 核心逻辑：自动发送验证码
       if (MsgType === 'event' && Event === 'subscribe') {
         const code = generateVerificationCode();
-        saveAuthCode(code, FromUserName);
+        saveAuthCode(code, FromUserName, undefined, event);
 
-        console.log(`[WeChat] 关注 ${FromUserName}，发送验证码 ${code}`);
+        log.log(`[WeChat] 关注 ${FromUserName}，发送验证码 ${code}`);
 
         const welcomeMsg = generateWelcomeMessage(FromUserName);
         const codeMsg = `\n\n━━━━━━━━━━━━━━━━━━\n✅ 您的验证码：${code}\n━━━━━━━━━━━━━━━━━━\n\n👉 在网站输入验证码完成认证\n\n💡 验证码5分钟内有效`;
@@ -122,8 +124,8 @@ export default eventHandler(async (event) => {
 
       } else if (MsgType === 'event' && Event === 'unsubscribe') {
         // 取消关注事件 - 清除用户认证状态
-        clearUserAuthentication(FromUserName);
-        console.log(`[WeChat] 取关 ${FromUserName}，已清除认证`);
+        clearUserAuthentication(FromUserName, event);
+        log.log(`[WeChat] 取关 ${FromUserName}，已清除认证`);
         return 'success';
 
       } else if (MsgType === 'event' && Event === 'LOCATION') {
@@ -138,9 +140,9 @@ export default eventHandler(async (event) => {
         } else if (containsAuthKeyword(content)) {
           // 认证关键词 - 重新发送验证码
           const existingCode = generateVerificationCode();
-          saveAuthCode(existingCode, FromUserName);
+          saveAuthCode(existingCode, FromUserName, undefined, event);
 
-          console.log(`[WeChat] 验证码 ${FromUserName} ${existingCode}`);
+          log.log(`[WeChat] 验证码 ${FromUserName} ${existingCode}`);
 
           replyMsg = generateCodeMessage(existingCode);
         } else {
@@ -203,7 +205,7 @@ export default eventHandler(async (event) => {
       }
 
     } catch (error) {
-      console.error('[WeChat] ❌ 处理出错:', error);
+      log.error('[WeChat] ❌ 处理出错:', error);
       return 'Internal Server Error';
     }
   }

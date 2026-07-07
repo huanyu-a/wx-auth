@@ -94,7 +94,7 @@ export default eventHandler(async (event) => {
         headimgurl: authData.headimgurl,
         unionid: authData.unionid,
         siteId: siteId as string | undefined
-      });
+      }, event);
 
       // 删除已使用的认证码
       deleteAuthCode(authToken as string);
