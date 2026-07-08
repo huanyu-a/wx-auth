@@ -33,7 +33,7 @@ export default defineNitroPlugin((nitroApp) => {
         ip,
         ua,
         'REQ',
-        `${event.method} ${event.path} -> ${status} (${ms}ms)`
+        [`${event.method} ${event.path} -> ${status} (${ms}ms)`]
       );
       rawOut(line);
     });

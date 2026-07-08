@@ -84,7 +84,8 @@ export function formatLog(
   level: LogLevel,
   args: unknown[]
 ): string {
-  const msg = args.map(stringify).join(' ');
+  const safe = Array.isArray(args) ? args : [args];
+  const msg = safe.map(stringify).join(' ');
   return `${time} [${ip}] [${ua}] [${level}] ${msg}`;
 }
 
