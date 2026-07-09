@@ -282,5 +282,5 @@ export function generateCodeMessage(code: string): string {
 
 👉 请在网站输入验证码完成认证
 ⏰ 验证码 5 分钟内有效
-💬 发送「验证码」可重新获取`;}
+💬 发送「验证码」可重新获取`;
 }
