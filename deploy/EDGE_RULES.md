@@ -15,9 +15,9 @@
 
 ## 一、OpenResty / 1Panel（你的部署方式）
 
-站点 `wx-auth.shenzjd.com` 由 1Panel 的 OpenResty 反代到容器 `127.0.0.1:6702`。
+站点 `wx-auth.bx9y.com.cn` 由宝塔面板 Nginx 反代到容器 `127.0.0.1:6702`。
 
-1. 打开 **1Panel → 网站 → wx-auth.shenzjd.com → 配置文件**。
+1. 打开 **宝塔面板 → 网站 → wx-auth.bx9y.com.cn → 配置文件**。
 2. 在 `server {` 内部、**现有的 `location / { proxy_pass ... }` 之前**，粘贴 `edge-rules.conf` 的全部内容。
 3. 点击"保存"后，1Panel 会自动做配置检查并重载；若手动操作则：
    ```bash

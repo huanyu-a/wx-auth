@@ -101,7 +101,7 @@ WxAuth.<span class="text-blue-400">init</span>({
               </div>
               <div class="flex items-start gap-3">
                 <span class="inline-flex items-center justify-center px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md font-mono text-xs flex-shrink-0">apiBase</span>
-                <span class="text-slate-600">后端 API 地址（<strong>可选，已有默认值</strong>），当前为 <code class="bg-slate-200 px-1 rounded text-xs">https://wx-auth.shenzjd.com</code></span>
+                <span class="text-slate-600">后端 API 地址（<strong>可选，已有默认值</strong>），当前为 <code class="bg-slate-200 px-1 rounded text-xs">https://wx-auth.bx9y.com.cn</code></span>
               </div>
               <div class="flex items-start gap-3">
                 <span class="inline-flex items-center justify-center px-2 py-0.5 bg-slate-200 text-slate-600 rounded-md font-mono text-xs flex-shrink-0">required</span>
@@ -117,7 +117,7 @@ WxAuth.<span class="text-blue-400">init</span>({
               </div>
               <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p class="text-sm text-yellow-800">
-                  <strong>⚠️ 注意：</strong><code class="bg-yellow-100 px-1 rounded text-xs">wechatName</code> 和 <code class="bg-yellow-100 px-1 rounded text-xs">qrcodeUrl</code> 无需配置，自动从后端获取，接入方配置也<strong>无效</strong>（统一使用"神族九帝"公众号）。
+                  <strong>⚠️ 注意：</strong><code class="bg-yellow-100 px-1 rounded text-xs">wechatName</code> 和 <code class="bg-yellow-100 px-1 rounded text-xs">qrcodeUrl</code> 无需配置，自动从后端获取，接入方配置也<strong>无效</strong>（统一使用后端配置的公众号）。
                 </p>
               </div>
               <div class="p-3 bg-green-50 border border-green-200 rounded-lg">

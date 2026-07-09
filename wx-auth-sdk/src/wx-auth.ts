@@ -16,7 +16,7 @@
  *
  * 2. 初始化
  *    WxAuth.init({
- *      apiBase: 'https://wx-auth.shenzjd.com',
+ *      apiBase: 'https://wx-auth.bx9y.com.cn',
  *      onVerified: (user) => { console.log('验证通过', user); }
  *    });
  *
@@ -48,13 +48,13 @@ interface WxAuthState {
 
 // 默认配置
 const DEFAULT_CONFIG: WxAuthConfig = {
-  apiBase: "https://wx-auth.shenzjd.com", // 后端API地址（默认值）
+  apiBase: "https://wx-auth.bx9y.com.cn", // 后端API地址（默认值）
   siteId: "", // 站点标识（可选，用于区分来源网站）
   onVerified: null, // 验证成功回调
   onError: null, // 错误回调
   onClose: null, // 关闭弹窗回调（仅在 required=false 时触发）
   required: true, // 是否必须认证（默认强制认证）
-  wechatName: "神族九帝", // 公众号名称（可选，会自动获取）
+  wechatName: "", // 公众号名称（可选，留空则从后端自动获取）
   qrcodeUrl: "", // 二维码URL（可选，会自动获取）
   silent: false, // 默认不静默
 };
@@ -70,8 +70,8 @@ let state: WxAuthState = {
 
 const utils = {
   // 从 apiBase 自动推导根域名（用于跨子域名共享 Cookie）
-  // auth.shenzjd.com → .shenzjd.com
-  // parse.shenzjd.com   → .shenzjd.com
+  // auth.bx9y.com.cn → .bx9y.com.cn
+  // wx-auth.bx9y.com.cn → .bx9y.com.cn
   // localhost / 127.0.0.1 / IP → 不设置 domain
   getRootDomain(): string {
     try {
@@ -81,7 +81,7 @@ const utils = {
         return '';
       }
       const parts = hostname.split('.');
-      // 至少两段才有意义（shenzjd.com），取最后两段
+      // 至少两段才有意义（bx9y.com.cn），取最后两段
       if (parts.length >= 2) {
         return '.' + parts.slice(-2).join('.');
       }

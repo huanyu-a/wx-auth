@@ -86,10 +86,10 @@ docker stop wx-auth && docker rm wx-auth
 ### 环境变量（.env）
 ```bash
 # 必须（Docker 部署必须加 NUXT_ 前缀，否则构建时被内联为空值）
-NUXT_PUBLIC_SITE_URL=https://wx-auth.shenzjd.com
+NUXT_PUBLIC_SITE_URL=https://wx-auth.bx9y.com.cn
 NUXT_WECHAT_TOKEN=your-wechat-token
 NUXT_SESSION_SECRET=dev-secret-change-in-production
-NUXT_WECHAT_NAME=神族九帝
+NUXT_WECHAT_NAME=知识分享萌
 NUXT_WECHAT_QRCODE_URL=https://your-site.com/qrcode.jpg
 
 # 可选（个人订阅号留空）
@@ -110,11 +110,11 @@ WxAuth.init({
 // 或手动指定配置（可选）
 WxAuth.init({
   siteId: 'my-website',                // ← 可选：站点唯一标识（不填则自动获取）
-  apiBase: 'https://wx-auth.shenzjd.com',  // 后端 API 地址（可选，有默认值）
+  apiBase: 'https://wx-auth.bx9y.com.cn',  // 后端 API 地址（可选，有默认值）
   required: false,                     // 是否必须认证（默认 true）
   silent: false,                       // ← 可选：true 时 init 不调弹窗，弹窗由 requireAuth() 手动触发
   // wechatName 和 qrcodeUrl 无需配置，自动从后端获取
-  // 接入方配置自己的公众号名称和二维码无效（统一使用"神族九帝"）
+  // 接入方配置自己的公众号名称和二维码无效（统一使用后端配置的公众号）
   onVerified: (user) => { ... },       // 验证成功回调
   onError: (error) => { ... },        // 错误回调
   onClose: () => { ... }               // 关闭弹窗回调（仅 required=false 时触发）
@@ -132,9 +132,9 @@ WxAuth.init({
 **核心概念：**
 - ✅ **所有参数都无需手动配置**
   - `siteId`：自动从 `document.referrer` 或当前域名获取
-  - `apiBase`：使用默认值 `https://wx-auth.shenzjd.com`
+  - `apiBase`：使用默认值 `https://wx-auth.bx9y.com.cn`
   - `wechatName` / `qrcodeUrl`：自动从后端获取
-- ✅ 所有接入方共享"神族九帝"公众号
+- ✅ 所有接入方共享后端配置的公众号
 - ✅ 认证流程统一走后端配置的公众号
 
 ### required 模式
@@ -150,7 +150,7 @@ WxAuth.init({
   1. 构建 Docker 镜像
   2. 推送到 GitHub Container Registry (ghcr.io)
   3. SSH 部署到生产服务器（端口 `6702`）
-  4. 数据持久化: `/opt/1panel/apps/openresty/openresty/www/sites/wx-auth.shenzjd.com/index/data`
+  4. 数据持久化: `/www/dk_project/dk_app/wx-auth/data`
 
 ### SDK 自动发布（修改 wx-auth-sdk 后 push 到 main）
 - **触发条件**: 修改 `wx-auth-sdk/` 目录后推送
@@ -230,7 +230,7 @@ WxAuth.init({
 2. **Session 密钥**：生产环境必须使用随机字符串（`openssl rand -hex 32`）
 3. **网站地址**：`SITE_URL` 必须与微信后台配置的回调地址一致
 4. **SDK 导入**：开发时从 `../wx-auth-sdk/src/index` 导入，生产时从 NPM 包导入
-5. **公众号配置**：接入方无需配置 `wechatName` 和 `qrcodeUrl`，配置也无效（统一使用后端配置的"神族九帝"公众号）
+5. **公众号配置**：接入方无需配置 `wechatName` 和 `qrcodeUrl`，配置也无效（统一使用后端配置的公众号）
 6. **siteId 自动获取**：SDK 会自动从 `document.referrer` 或当前域名获取 `siteId`，无需手动配置
 7. **Docker 环境变量前缀**：私有配置需加 `NUXT_` 前缀（如 `NUXT_WECHAT_TOKEN`），公开配置加 `NUXT_PUBLIC_` 前缀（如 `NUXT_PUBLIC_SITE_URL`）
 
@@ -248,16 +248,16 @@ docker logs -f wx-auth
 ### 测试微信消息接收
 ```bash
 # 微信后台配置服务器 URL
-# https://wx-auth.shenzjd.com/api/wechat/message
+# https://wx-auth.bx9y.com.cn/api/wechat/message
 ```
 
 ### 验证认证状态
 ```bash
 # 检查 Cookie
-curl -I https://wx-auth.shenzjd.com
+curl -I https://wx-auth.bx9y.com.cn
 
 # 手动调用认证检查接口
-curl "https://wx-auth.shenzjd.com/api/auth/check?openid=test-openid"
+curl "https://wx-auth.bx9y.com.cn/api/auth/check?openid=test-openid"
 ```
 
 ### SDK 开发调试
@@ -321,16 +321,16 @@ location.reload()
 #### 认证订阅号（有网页跳转权限）
 ```
 📱 菜单一：前往认证
-   └─ 跳转网页 → https://wx-auth.shenzjd.com
+   └─ 跳转网页 → https://wx-auth.bx9y.com.cn
 
 🔧 菜单二：我的工具
-   ├─ 在线网盘 → https://alist.shenzjd.com
-   ├─ 快链工具 → https://duanlian.shenzjd.com
-   └─ 视频解析 → https://parse.shenzjd.com
+   ├─ 导航站 → https://hao.bx9y.com.cn
+   ├─ 网盘搜索 → https://panseek.bx9y.com.cn
+   └─ 工具网 → https://tool.bx9y.com.cn
 
 🌐 菜单三：更多
-   ├─ 首页 → https://shenzjd.com
-   └─ GitHub → https://github.com/wu529778790
+   ├─ 首页 → https://www.bx9y.com.cn
+   └─ GitHub → https://github.com/huanyu-a
 ```
 
 #### 未认证订阅号（仅支持发送消息）
@@ -354,8 +354,8 @@ location.reload()
 ## 相关资源
 
 - **NPM 包**: https://www.npmjs.com/package/wx-auth-sdk
-- **GitHub 仓库**: https://github.com/wu529778790/wx-auth
-- **生产地址**: https://wx-auth.shenzjd.com
+- **GitHub 仓库**: https://github.com/huanyu-a/wx-auth
+- **生产地址**: https://wx-auth.bx9y.com.cn
 - **SDK 文档**: `wx-auth-sdk/README.md`
 
 ---

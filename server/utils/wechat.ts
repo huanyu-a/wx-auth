@@ -235,16 +235,12 @@ export function containsAuthKeyword(content: string): boolean {
 export function generateWelcomeMessage(openid: string): string {
   const siteUrl = useRuntimeConfig().public.siteUrl;
 
-  return `🎉 欢迎关注神族九帝！
+  return `🎉 欢迎关注知识分享萌！
 
-🔗 我的首页：https://shenzjd.com
-📍 在线网盘：https://alist.shenzjd.com
-📍 网盘搜索：https://panhub.shenzjd.com
-📍 快链工具：https://duanlian.shenzjd.com
-📍 视频解析：https://parse.shenzjd.com
-📍 热点聚合：https://newshub.shenzjd.com
-📍 个人导航：https://navhub.shenzjd.com
-📍 必应壁纸：https://bing.shenzjd.com`;
+🔗 我的首页：https://www.bx9y.com.cn
+📍 导航站：https://hao.bx9y.com.cn
+📍 网盘搜索：https://panseek.bx9y.com.cn
+📍 工具网：https://tool.bx9y.com.cn`;
 }
 
 /**

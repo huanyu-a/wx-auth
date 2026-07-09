@@ -197,11 +197,10 @@ const API_BASE = "";
 const SITE_ID = "auth-homepage";
 
 // 公众号名称（可选，自动从后端获取）
-const WECHAT_NAME = "神族九帝";
+const WECHAT_NAME = "知识分享萌";
 
 // 公众号二维码 URL（可选，自动从后端获取）
-const WECHAT_QRCODE_URL =
-  "https://cdn.jsdmirror.com/gh/wu529778790/img.shenzjd.com@master/wp/1782738963299-5wrchz.jpg";
+const WECHAT_QRCODE_URL = "";
 // ============================================================
 
 const hasAuthCookie = ref(false);

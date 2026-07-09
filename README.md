@@ -65,7 +65,7 @@ SDK 检查 Cookie
                        │
                        ▼
               ┌────────────────────┐
-              │ 微信公众号"神族九帝" │
+              │ 微信公众号"知识分享萌" │
               └────────────────────┘
 ```
 
@@ -169,7 +169,7 @@ push 到 `main` 分支自动触发 GitHub Actions 构建 + 部署。
 - **SDK 文档**：`wx-auth-sdk/README.md`
 - **GitHub**：https://github.com/wu529778790/wx-auth
 - **NPM 包**：https://www.npmjs.com/package/wx-auth-sdk
-- **生产地址**：https://wx-auth.shenzjd.com
+- **生产地址**：https://wx-auth.bx9y.com.cn
 
 ---
 

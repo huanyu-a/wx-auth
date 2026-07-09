@@ -14,4 +14,4 @@ Disallow: /.git/
 Crawl-delay: 10
 
 # Sitemap（无可爬取内容）
-# Sitemap: https://wx-auth.shenzjd.com/sitemap.xml
+# Sitemap: https://wx-auth.bx9y.com.cn/sitemap.xml

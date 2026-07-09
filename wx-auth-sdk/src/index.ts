@@ -9,7 +9,7 @@
  *
  * 2. 初始化
  *    WxAuth.init({
- *      apiBase: 'https://wx-auth.shenzjd.com',
+ *      apiBase: 'https://wx-auth.bx9y.com.cn',
  *      onVerified: (user) => { console.log('验证通过', user); }
  *    });
  *
