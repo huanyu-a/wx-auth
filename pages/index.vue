@@ -197,7 +197,7 @@ const API_BASE = "";
 const SITE_ID = "auth-homepage";
 
 // 公众号名称（可选，自动从后端获取）
-const WECHAT_NAME = "知识分享萌";
+const WECHAT_NAME = "拉着猫咪逛公园";
 
 // 公众号二维码 URL（可选，自动从后端获取）
 const WECHAT_QRCODE_URL = "";

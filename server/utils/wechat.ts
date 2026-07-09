@@ -235,7 +235,7 @@ export function containsAuthKeyword(content: string): boolean {
 export function generateWelcomeMessage(openid: string): string {
   const siteUrl = useRuntimeConfig().public.siteUrl;
 
-  return `🎉 欢迎关注知识分享萌！
+  return `🎉 欢迎关注拉着猫咪逛公园！
 
 🔗 我的首页：https://www.bx9y.com.cn
 📍 导航站：https://hao.bx9y.com.cn

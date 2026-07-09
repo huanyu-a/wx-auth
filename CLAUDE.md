@@ -89,7 +89,7 @@ docker stop wx-auth && docker rm wx-auth
 NUXT_PUBLIC_SITE_URL=https://wx-auth.bx9y.com.cn
 NUXT_WECHAT_TOKEN=your-wechat-token
 NUXT_SESSION_SECRET=dev-secret-change-in-production
-NUXT_WECHAT_NAME=知识分享萌
+NUXT_WECHAT_NAME=拉着猫咪逛公园
 NUXT_WECHAT_QRCODE_URL=https://your-site.com/qrcode.jpg
 
 # 可选（个人订阅号留空）
