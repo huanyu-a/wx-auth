@@ -48,20 +48,43 @@ export function decryptWeChatMessage(
     const encrypted = Buffer.from(encryptMsg, 'base64');
 
     // 3. 解密
-    let decrypted = cipher.update(encrypted);
-    decrypted = Buffer.concat([decrypted, cipher.final()]);
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    decipher.setAutoPadding(false);
+    let decrypted = Buffer.concat([
+      decipher.update(encrypted),
+      decipher.final()
+    ]);
 
-    // 4. 去除 PKCS#7 填充
+    // 4. 去除 PKCS#7 填充（手动处理）
     const padLen = decrypted[decrypted.length - 1];
-    const unpadded = decrypted.slice(0, decrypted.length - padLen);
+    const safePadLen = (padLen > 0 && padLen <= 32) ? padLen : 0;
+    const unpadded = safePadLen > 0 ? decrypted.slice(0, decrypted.length - safePadLen) : decrypted;
 
     // 5. 解析报文格式：随机16字节 + 消息长度(4字节) + 消息内容 + AppID
+    // 注意：部分微信个人订阅号的 msgLen 可能不准确，用安全截取方式
     const msgLen = unpadded.readUInt32BE(16);
-    const content = unpadded.slice(20, 20 + msgLen).toString('utf8');
-    const appIdFromMsg = unpadded.slice(20 + msgLen).toString('utf8');
+    let content: string;
+    let appIdFromMsg: string;
+    if (20 + msgLen <= unpadded.length) {
+      // 标准格式：msgLen 准确
+      content = unpadded.slice(20, 20 + msgLen).toString('utf8');
+      appIdFromMsg = unpadded.slice(20 + msgLen).toString('utf8');
+    } else {
+      // 兼容格式：msgLen 不准确，取 20 之后所有内容，然后从中分离 AppID
+      const allContent = unpadded.slice(20).toString('utf8');
+      // XML 内容以 </xml> 结尾，后面如果有 AppID 则分离
+      const xmlEnd = allContent.lastIndexOf('</xml>');
+      if (xmlEnd >= 0) {
+        content = allContent.substring(0, xmlEnd + 6);
+        appIdFromMsg = allContent.substring(xmlEnd + 6).trim();
+      } else {
+        content = allContent;
+        appIdFromMsg = '';
+      }
+    }
 
-    // 6. 验证AppID
-    if (appIdFromMsg !== appId) {
+    // 6. 验证AppID（部分公众号消息体不含AppID，跳过验证）
+    if (appIdFromMsg && appId && appIdFromMsg !== appId) {
       throw new Error(`AppID验证失败: 期望[${appId}] 收到[${appIdFromMsg}]`);
     }
 
@@ -111,8 +134,9 @@ export function encryptWeChatReply(
     padding.fill(padLen);
     const paddedContent = Buffer.concat([content, padding]);
 
-    // 5. AES-256-CBC 加密
+    // 5. AES-256-CBC 加密（已手动填充，禁用自动填充）
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    cipher.setAutoPadding(false);
     let encrypted = cipher.update(paddedContent);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
 
@@ -235,25 +259,28 @@ export function containsAuthKeyword(content: string): boolean {
 export function generateWelcomeMessage(openid: string): string {
   const siteUrl = useRuntimeConfig().public.siteUrl;
 
-  return `🎉 欢迎关注拉着猫咪逛公园！
+  return `🐱 欢迎关注「拉着猫咪逛公园」！
 
-🔗 我的首页：https://www.bx9y.com.cn
-📍 导航站：https://hao.bx9y.com.cn
-📍 网盘搜索：https://panseek.bx9y.com.cn
-📍 工具网：https://tool.bx9y.com.cn`;
+━━━━━━━━━━━━━━━━━━
+🏠 精选导航 · 网盘搜索 · 实用工具
+━━━━━━━━━━━━━━━━━━
+
+🌐 导航站：hao.bx9y.com.cn
+🔍 网盘搜索：panseek.bx9y.com.cn
+🛠️ 工具网：tool.bx9y.com.cn`;
 }
 
 /**
  * 生成验证码回复消息 - 请求验证码时使用
  */
 export function generateCodeMessage(code: string): string {
-  return `✅ 验证码已生成
+  return `🔐 验证码已生成
 
-━━━━━━━━━━━━━━━━━━
-您的验证码：${code}
-━━━━━━━━━━━━━━━━━━
+╔═════════════════╗
+     ${code}
+╚═════════════════╝
 
-👉 在网站输入验证码完成认证
-
-💡 验证码5分钟内有效`;
+👉 请在网站输入验证码完成认证
+⏰ 验证码 5 分钟内有效
+💬 发送「验证码」可重新获取`;}
 }

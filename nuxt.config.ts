@@ -37,11 +37,11 @@ export default defineNuxtConfig({
     // 私有配置（仅服务端可用）
     wechat: {
       // 微信后台配置
-      token: process.env.NUXT_WECHAT_TOKEN || process.env.WECHAT_TOKEN || '',
-      appId: process.env.NUXT_WECHAT_APPID || process.env.WECHAT_APPID || '',
-      aesKey: process.env.NUXT_WECHAT_AES_KEY || process.env.WECHAT_AES_KEY || '',
+      token: process.env.NUXT_WECHAT_TOKEN || process.env.WECHAT_TOKEN,
+      appId: process.env.NUXT_WECHAT_APPID || process.env.WECHAT_APPID,
+      aesKey: process.env.NUXT_WECHAT_AES_KEY || process.env.WECHAT_AES_KEY,
       name: process.env.NUXT_WECHAT_NAME || process.env.WECHAT_NAME || '公众号',
-      qrcodeUrl: process.env.NUXT_WECHAT_QRCODE_URL || process.env.WECHAT_QRCODE_URL || ''
+      qrcodeUrl: process.env.NUXT_WECHAT_QRCODE_URL || process.env.WECHAT_QRCODE_URL
     },
     session: {
       secret: process.env.NUXT_SESSION_SECRET || process.env.SESSION_SECRET || 'dev-secret-change-in-production',

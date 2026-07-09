@@ -27,7 +27,14 @@ import { makeLogger } from '../../utils/logger';
 export default eventHandler(async (event) => {
   const method = getMethod(event);
   const log = makeLogger(event);
-  const config = useRuntimeConfig().wechat;
+  // 运行时环境变量直接读取（解决 Nuxt 构建时固化空值的问题）
+  const config = {
+    token: process.env.NUXT_WECHAT_TOKEN || useRuntimeConfig().wechat?.token || '',
+    appId: process.env.NUXT_WECHAT_APPID || useRuntimeConfig().wechat?.appId || '',
+    aesKey: process.env.NUXT_WECHAT_AES_KEY || useRuntimeConfig().wechat?.aesKey || '',
+    name: process.env.NUXT_WECHAT_NAME || useRuntimeConfig().wechat?.name || '公众号',
+    qrcodeUrl: process.env.NUXT_WECHAT_QRCODE_URL || useRuntimeConfig().wechat?.qrcodeUrl || ''
+  };
 
   // 验证配置
   if (!config.token) {
@@ -60,23 +67,31 @@ export default eventHandler(async (event) => {
     try {
       const body = await readBody(event);
       if (!body) {
+        log.error('[WeChat] Empty body');
         return 'Empty body';
       }
 
+      log.log('[WeChat] 收到消息, encrypt_type=' + encrypt_type + ', body type=' + typeof body);
+
       // 判断是否是加密消息（安全模式）
-      const isEncrypted = encrypt_type === 'aes' || body.includes('<Encrypt>');
+      const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
+      const isEncrypted = encrypt_type === 'aes' || bodyStr.includes('<Encrypt>');
+
+      log.log('[WeChat] isEncrypted=' + isEncrypted);
 
       let message: any;
       let needEncrypt = false;
 
       if (isEncrypted) {
         // ========== 安全模式（加密消息）==========
-        const encryptMatch = body.match(/<Encrypt><!\[CDATA\[(.*?)\]\]><\/Encrypt>/);
+        const encryptMatch = bodyStr.match(/<Encrypt><!\[CDATA\[(.*?)\]\]><\/Encrypt>/);
         if (!encryptMatch) {
+          log.error('[WeChat] 未找到Encrypt节点, body=' + bodyStr.substring(0, 200));
           return 'Invalid encrypted message';
         }
 
         const encryptMsg = encryptMatch[1];
+        log.log('[WeChat] encryptMsg length=' + encryptMsg.length + ', first20=' + encryptMsg.substring(0, 20));
 
         // 微信安全模式签名验证
         const expectedSignature = generateSignature(
@@ -87,17 +102,20 @@ export default eventHandler(async (event) => {
         );
 
         if (!msg_signature || msg_signature !== expectedSignature) {
-          log.error('[WeChat] 消息签名验证失败');
+          log.error('[WeChat] 消息签名验证失败, expected=' + expectedSignature + ', got=' + msg_signature);
           return 'Invalid signature';
         }
 
+        log.log('[WeChat] 开始解密, aesKey=' + (config.aesKey ? '已设置(' + config.aesKey.length + '字符)' : '未设置') + ', appId=' + config.appId);
         const decryptedXml = decryptWeChatMessage(
           encryptMsg,
           config.aesKey,
           config.appId
         );
+        log.log('[WeChat] 解密成功, decryptedXml=' + decryptedXml.substring(0, 200));
 
         message = parseWeChatMessage(decryptedXml);
+        log.log('[WeChat] 解析消息, MsgType=' + message.MsgType + ', Event=' + message.Event + ', FromUserName=' + message.FromUserName);
         needEncrypt = true;
 
       } else {
@@ -106,6 +124,7 @@ export default eventHandler(async (event) => {
       }
 
       const { MsgType, Event, FromUserName, ToUserName, Content } = message;
+      log.log('[WeChat] 处理消息, MsgType=' + MsgType + ', Event=' + Event + ', Content=' + Content);
 
       // 处理消息逻辑
       let replyMsg = '';
@@ -118,7 +137,7 @@ export default eventHandler(async (event) => {
         log.log(`[WeChat] 关注 ${FromUserName}，发送验证码 ${code}`);
 
         const welcomeMsg = generateWelcomeMessage(FromUserName);
-        const codeMsg = `\n\n━━━━━━━━━━━━━━━━━━\n✅ 您的验证码：${code}\n━━━━━━━━━━━━━━━━━━\n\n👉 在网站输入验证码完成认证\n\n💡 验证码5分钟内有效`;
+        const codeMsg = `\n\n━━━━━━━━━━━━━━━━━━\n🔐 您的专属验证码\n\n╔═════════════════╗\n     ${code}\n╚═════════════════╝\n\n👉 请在网站输入验证码完成认证\n⏰ 验证码 5 分钟内有效\n💬 发送「验证码」可重新获取`;
 
         replyMsg = welcomeMsg + codeMsg;
 
@@ -136,7 +155,7 @@ export default eventHandler(async (event) => {
         const content = String(Content || '').trim();
 
         if (!content) {
-          replyMsg = '请输入有效内容。发送"验证码"获取验证码。';
+          replyMsg = '💬 请输入有效内容\n\n发送「验证码」获取验证码';
         } else if (containsAuthKeyword(content)) {
           // 认证关键词 - 重新发送验证码
           const existingCode = generateVerificationCode();
@@ -147,7 +166,7 @@ export default eventHandler(async (event) => {
           replyMsg = generateCodeMessage(existingCode);
         } else {
           // 默认回复
-          replyMsg = '欢迎！如果您需要重新获取验证码，请发送"验证码"。';
+          replyMsg = '🐱 喵～收到你的消息啦！\n\n如需获取验证码，请发送「验证码」';
         }
       }
 

@@ -7,8 +7,8 @@ export default eventHandler(async (event) => {
   const config = useRuntimeConfig();
 
   return {
-    wechatName: config.wechat?.name || process.env.WECHAT_NAME || '公众号',
-    qrcodeUrl: config.wechat?.qrcodeUrl || process.env.WECHAT_QRCODE_URL || '',
+    wechatName: process.env.NUXT_WECHAT_NAME || config.wechat?.name || process.env.WECHAT_NAME || '公众号',
+    qrcodeUrl: process.env.NUXT_WECHAT_QRCODE_URL || config.wechat?.qrcodeUrl || process.env.WECHAT_QRCODE_URL || '',
     codeLength: config.code?.length || 6
   };
 });

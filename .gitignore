@@ -61,3 +61,7 @@ REFACTORING_SUMMARY.md
 
 wx-auth.tar
 wx-auth.conf
+gen_qrcode.sh
+gen_qrcode2.sh
+test-config.mjs
+qrcode_for_gh_1ab9a21cc178_344.jpg
