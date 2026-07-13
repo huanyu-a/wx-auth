@@ -34,15 +34,11 @@
               <div class="bg-slate-50 rounded-xl p-4 space-y-3 text-sm">
                 <div class="flex items-start gap-3">
                   <span class="font-semibold text-[#07C160] min-w-[60px]">API:</span>
-                  <span class="text-slate-600 break-all font-mono text-xs">{{ API_BASE }}</span>
+                  <span class="text-slate-600 break-all font-mono text-xs">{{ API_BASE || 'auto' }}</span>
                 </div>
                 <div class="flex items-center gap-3">
                   <span class="font-semibold text-[#07C160] min-w-[60px]">公众号:</span>
                   <span class="text-slate-700 font-medium">{{ WECHAT_NAME }}</span>
-                </div>
-                <div v-if="WECHAT_QRCODE_URL" class="flex items-start gap-3">
-                  <span class="font-semibold text-[#07C160] min-w-[60px]">二维码:</span>
-                  <span class="text-slate-500 text-xs break-all">{{ WECHAT_QRCODE_URL }}</span>
                 </div>
               </div>
             </div>
@@ -199,18 +195,15 @@ const SITE_ID = "auth-homepage";
 // 公众号名称（可选，自动从后端获取）
 const WECHAT_NAME = "拉着猫咪逛公园";
 
-// 公众号二维码 URL（可选，自动从后端获取）
-const WECHAT_QRCODE_URL = "";
+// 公众号二维码 URL（使用本地 public/ 目录的静态文件）
+const WECHAT_QRCODE_URL = "/qrcode.jpg";
 // ============================================================
 
 const hasAuthCookie = ref(false);
 
-// 检查本地 Cookie
+// 检查本地 Cookie（同时检查新版签名 Token 和旧版 openid）
 function checkLocalCookie(): boolean {
-  const cookie = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("wxauth-openid="));
-  return !!cookie;
+  return document.cookie.includes("wxauth-token=") || document.cookie.includes("wxauth-openid=");
 }
 
 // 更新按钮状态
@@ -220,8 +213,9 @@ function updateButtonState(): void {
 
 // 清空认证状态
 function clearAuth(): void {
-  // 清除 Cookie
+  // 清除所有 wxauth Cookie
   document.cookie = "wxauth-openid=; Max-Age=0; path=/";
+  document.cookie = "wxauth-token=; Max-Age=0; path=/";
 
   // 刷新页面，自动触发认证弹窗
   window.location.reload();
@@ -236,8 +230,8 @@ function triggerAuth(): void {
 // 页面加载时自动初始化 SDK
 onMounted(async () => {
   // 初始化 SDK（使用页面顶部的配置）
-  // SDK 会自动检测 Cookie 并静默认证，未认证时显示弹窗
-  WxAuth.init({
+  // init() 返回 Promise<boolean>：true=已认证，false=未认证/用户关闭弹窗
+  const authenticated = await WxAuth.init({
     apiBase: API_BASE,
     siteId: SITE_ID,
     required: false, // 可选认证，允许用户关闭弹窗
@@ -246,6 +240,8 @@ onMounted(async () => {
     onVerified: (user) => {
       console.log("[Index] 验证成功", user);
       updateButtonState();
+      // ✅ 验证完成后再执行业务逻辑（如搜索）
+      console.log("[Index] 验证完成，开始执行业务逻辑...");
     },
     onError: (error) => {
       console.error("[Index] 错误", error);
@@ -256,6 +252,13 @@ onMounted(async () => {
       // 可以在这里添加自定义逻辑，比如显示提示等
     },
   });
+
+  // 或者在这里检查 init() 返回值（不依赖 onVerified 回调）
+  if (authenticated) {
+    console.log("[Index] 用户已认证，可执行业务逻辑");
+  } else {
+    console.log("[Index] 用户未认证或关闭了弹窗");
+  }
 
   // 更新按钮状态
   updateButtonState();

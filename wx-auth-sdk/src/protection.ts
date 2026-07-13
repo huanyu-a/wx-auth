@@ -32,6 +32,13 @@ const protection: ProtectionState = {
 };
 
 /**
+ * 页面卸载时禁用保护，防止 rAF 在页面刷新/卸载时尝试恢复弹窗
+ */
+function handleBeforeUnload(): void {
+  Protection.disable();
+}
+
+/**
  * 弹窗保护器
  */
 export const Protection = {
@@ -45,6 +52,9 @@ export const Protection = {
     if (protection.rafId !== null) { cancelAnimationFrame(protection.rafId); protection.rafId = null; }
     protection.isProtected = true;
     protection.restorePending = false;
+
+    // 页面刷新/关闭时禁用保护，防止 rAF 在页面卸载期间尝试恢复弹窗
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     // ---- 1. MutationObserver：实时检测 DOM 删除 ----
     //    style 隐藏类操作（display/visibility/opacity）由 rAF 轮询兜底，
@@ -71,6 +81,11 @@ export const Protection = {
     // ---- 2. requestAnimationFrame：每帧检查弹窗存在性和可见性 ----
     const tick = () => {
       if (!protection.isProtected) return;
+      // 页面不可见（刷新/关闭/切换标签）时跳过本轮，避免在卸载途中操作 DOM
+      if (document.visibilityState === 'hidden') {
+        protection.rafId = requestAnimationFrame(tick);
+        return;
+      }
       const { getState } = config;
       if (!getState().isOpen) {
         // 弹窗已关闭 → 停掉本轮，下次 enable 重新调度
@@ -113,6 +128,10 @@ export const Protection = {
     }
     protection.isProtected = false;
     protection.restorePending = false;
+
+    // 移除页面卸载事件监听
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+
     console.log('[WxAuth] 弹窗保护已禁用');
   },
 

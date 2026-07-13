@@ -373,8 +373,9 @@ const UI = {
 export type { WxAuthConfig };
 
 export const WxAuth = {
-  // 初始化
-  init(options: Partial<WxAuthConfig> = {}): void {
+  // 初始化（异步返回认证结果）
+  // 返回: true=已认证, false=未认证或用户关闭弹窗
+  async init(options: Partial<WxAuthConfig> = {}): Promise<boolean> {
     config = { ...DEFAULT_CONFIG, ...options };
 
     // 未设置 apiBase 时自动使用当前域名
@@ -384,7 +385,7 @@ export const WxAuth = {
 
     if (!config.apiBase) {
       console.error("[WxAuth] apiBase is required");
-      return;
+      return false;
     }
 
     // 未设置 siteId 时自动从 referrer 或当前域名获取
@@ -416,14 +417,15 @@ export const WxAuth = {
     console.log("[WxAuth] SDK initialized", config);
 
     // silent → 只校验 cookie，弹窗由消费者自己控制
-    // 非 silent → 保持现有行为（需要弹窗时自动弹）
+    // 非 silent → 自动检查，若未认证则显示弹窗并等待验证
     if (typeof window !== "undefined") {
       if (config.silent) {
-        this.silentCheck();
+        return await this.silentCheck();
       } else {
-        this.autoCheck();
+        return await this.autoCheck();
       }
     }
+    return false;
   },
 
   /**
@@ -468,54 +470,60 @@ export const WxAuth = {
   },
 
   // 自动检测 Cookie 并验证（内部使用）
+  // 有有效 Cookie → 快速返回 true；无 Cookie → 弹窗并等待用户完成验证
   async autoCheck(): Promise<boolean> {
     // 优先读取签名 Token Cookie，向后兼容旧版 openid Cookie
     const signedToken = utils.getCookie("wxauth-token");
     const legacyOpenid = utils.getCookie("wxauth-openid");
     const token = signedToken || legacyOpenid;
 
-    if (!token) {
-      // 没有 Cookie，显示弹窗
-      this.showAuthModal();
-      return false;
-    }
+    if (token) {
+      const siteParam = config.siteId ? `&siteId=${encodeURIComponent(config.siteId)}` : '';
+      const tokenParam = signedToken
+        ? `token=${encodeURIComponent(signedToken)}`
+        : `openid=${encodeURIComponent(legacyOpenid || '')}`;
 
-    const siteParam = config.siteId ? `&siteId=${encodeURIComponent(config.siteId)}` : '';
-    // 使用 token 参数（签名 Token），向后兼容 openid 参数
-    const tokenParam = signedToken
-      ? `token=${encodeURIComponent(signedToken)}`
-      : `openid=${encodeURIComponent(legacyOpenid || '')}`;
+      try {
+        const result = await utils.request(
+          `${config.apiBase}/api/auth/check?${tokenParam}${siteParam}`
+        );
 
-    try {
-      const result = await utils.request(
-        `${config.apiBase}/api/auth/check?${tokenParam}${siteParam}`
-      );
-
-      if (result.authenticated) {
-        console.log("[WxAuth] 自动认证成功（Cookie）");
-        // 如果服务端返回了签名 Token，升级存储
-        if (result.token) {
-          utils.setCookie("wxauth-token", result.token);
-          // 清除旧的明文 openid Cookie
-          if (legacyOpenid) {
-            utils.deleteCookie("wxauth-openid");
+        if (result.authenticated) {
+          console.log("[WxAuth] 自动认证成功（Cookie）");
+          // 如果服务端返回了签名 Token，升级存储
+          if (result.token) {
+            utils.setCookie("wxauth-token", result.token);
+            if (legacyOpenid) utils.deleteCookie("wxauth-openid");
           }
+          this.onVerified(result.user);
+          return true;
+        } else {
+          // Cookie 无效，删除它并继续弹窗等待验证
+          utils.deleteCookie("wxauth-token");
+          if (legacyOpenid) utils.deleteCookie("wxauth-openid");
         }
-        this.onVerified(result.user);
-        return true;
-      } else {
-        // Cookie 无效，删除它并显示弹窗
-        utils.deleteCookie("wxauth-token");
-        if (legacyOpenid) utils.deleteCookie("wxauth-openid");
-        this.showAuthModal();
-        return false;
+      } catch (error) {
+        console.error("[WxAuth] 自动验证失败:", error);
+        // 网络错误：不删 Cookie（可能下次恢复），弹窗等待验证
       }
-    } catch (error) {
-      console.error("[WxAuth] 自动验证失败:", error);
-      // 请求失败，显示弹窗
-      this.showAuthModal();
-      return false;
     }
+
+    // === 无有效 Cookie → 弹窗并等待用户完成验证 ===
+    // 这样消费者可以 await init()，确保验证完成后才继续执行
+
+    // 如果弹窗已打开且有等待中的验证，复用当前流
+    if (state.isOpen && state.resolveAuth) {
+      return new Promise((resolve) => {
+        state.resolveAuth = resolve;
+      });
+    }
+
+    await this.showAuthModal();
+
+    // 返回 Promise，等待用户验证通过（resolveAuth(true)）或关闭弹窗（resolveAuth(false)）
+    return new Promise((resolve) => {
+      state.resolveAuth = resolve;
+    });
   },
 
   // 显示认证弹窗（内部使用）
@@ -557,44 +565,9 @@ export const WxAuth = {
     }, 100);
   },
 
-  // 主入口：需要验证时调用
+  // 主入口：需要验证时调用（与 autoCheck 共享相同逻辑）
   async requireAuth(): Promise<boolean> {
-    // 1. 检查本地Cookie（优先签名 Token，向后兼容旧版 openid）
-    const signedToken = utils.getCookie("wxauth-token");
-    const legacyOpenid = utils.getCookie("wxauth-openid");
-    const token = signedToken || legacyOpenid;
-
-    if (token) {
-      try {
-        const siteParam = config.siteId ? `&siteId=${encodeURIComponent(config.siteId)}` : '';
-        const tokenParam = signedToken
-          ? `token=${encodeURIComponent(signedToken)}`
-          : `openid=${encodeURIComponent(legacyOpenid || '')}`;
-        const result = await utils.request(
-          `${config.apiBase}/api/auth/check?${tokenParam}${siteParam}`
-        );
-        if (result.authenticated) {
-          console.log("[WxAuth] 已认证（Cookie）");
-          // 升级到签名 Token
-          if (result.token) {
-            utils.setCookie("wxauth-token", result.token);
-            if (legacyOpenid) utils.deleteCookie("wxauth-openid");
-          }
-          this.onVerified(result.user);
-          return true;
-        }
-      } catch (e) {
-        console.error("[WxAuth] Cookie check failed:", e);
-      }
-    }
-
-    // 2. 显示弹窗（自动从后端获取配置）
-    await this.showAuthModal();
-
-    // 3. 返回Promise，等待验证完成
-    return new Promise((resolve) => {
-      state.resolveAuth = resolve;
-    });
+    return await this.autoCheck();
   },
 
   // 验证验证码
@@ -638,7 +611,8 @@ export const WxAuth = {
 
         // 延迟关闭弹窗，让用户看到成功状态
         setTimeout(() => {
-          this.close();
+          // 先 resolve(true)，再触发 onVerified 回调（close 就不会再 resolve(false)）
+          this.close(true);
           this.onVerified(result.user);
         }, 500);
       } else {
@@ -661,14 +635,15 @@ export const WxAuth = {
   },
 
   // 关闭弹窗
-  close(): void {
+  // fromVerified: true 表示验证成功后关闭，resolve(true) 且不触发 onClose
+  close(fromVerified: boolean = false): void {
     UI.hide();
     if (state.resolveAuth) {
-      state.resolveAuth(false);
+      state.resolveAuth(fromVerified);
       state.resolveAuth = null;
     }
-    // 触发关闭回调
-    if (typeof config.onClose === "function") {
+    // 验证成功后的关闭不触发 onClose
+    if (!fromVerified && typeof config.onClose === "function") {
       config.onClose();
     }
   },
